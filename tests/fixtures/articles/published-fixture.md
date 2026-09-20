@@ -20,6 +20,8 @@ This is a published fixture. It exists so the tests have something real to asser
 
 ## How it works
 
+![A fixture figure](/figures/zip-318/fig-2-turnstile.svg "Fixture caption text.")
+
 A second section, so the outline has two entries.
 
 ## Sources

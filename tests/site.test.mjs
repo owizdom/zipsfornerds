@@ -77,3 +77,16 @@ test('AT8 RSS is well-formed and lists only published articles', () => {
   assert.equal(open, 1, 'fixture build should have exactly one published item')
   assert.ok(xml.includes('A Fixture Proposal'))
 })
+
+test('AT10 figures render with captions and every local image exists', () => {
+  const html = read('articles/published-fixture/index.html')
+  assert.match(html, /<figure><img[^>]+fig-2-turnstile\.svg[^>]*><figcaption>Fixture caption text\.<\/figcaption><\/figure>/)
+  let checked = 0
+  for (const f of walk(out).filter((p) => p.endsWith('.html'))) {
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/<img\b[^>]*?\ssrc=["'](\/[^"']+)["']/gi)) {
+      checked++
+      assert.ok(fs.existsSync(path.join(out, m[1])), `${path.relative(out, f)} references missing image ${m[1]}`)
+    }
+  }
+  assert.ok(checked > 0, 'no images were checked')
+})
