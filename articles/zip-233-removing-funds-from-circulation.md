@@ -23,7 +23,7 @@ Zcash, like Bitcoin, has a problem it inherited rather than chose: the block sub
 
 - ZIP 233 adds a way for anyone to voluntarily remove ZEC from circulation, as part of an ordinary transaction.
 - It is deliberately **not** a burn. The ZIP's stated intent is that removed funds "will be returned to circulation through future block subsidies, rather than being permanently destroyed or held in reserve for discretionary use."
-- On its own it does almost nothing. It creates headroom under the 21 million cap. **ZIP 234** is what reissues the removed funds, and **ZIP 235** is what supplies them automatically from transaction fees.
+- On its own it does almost nothing. It creates headroom under the 21 million cap. **ZIP 234** is what reissues the removed funds, and **ZIP 235** is what supplies them automatically, removing at least 60% of transaction fees.
 - Together the three are called the **Network Sustainability Mechanism**.
 - Mechanically it is small: a new bundle type in the V7 transaction format, with no effecting data and no authorizing data. The amount is simply an entry in the transaction's value pool deltas.
 - It is an NU7 candidate and still a Draft.
@@ -34,7 +34,7 @@ Bitcoin's design has a known terminus. The block subsidy halves until it rounds 
 
 Whether fees alone can fund security is one of the longest-running open questions in the field, and nobody has an answer backed by evidence, because no major chain has reached that point yet.
 
-ZIP 233's motivation names the concern directly, calling it a problem "shared by Bitcoin-like systems." Its framing is about **Long Term Consensus Sustainability**: enabling removal of funds gives the network the ability to create "headroom" between the chain value and MAX_MONEY, and this "lays necessary groundwork for extending the block subsidy system, which currently has a clear final end date."
+ZIP 233's motivation names the concern directly, as "concerns about the sustainability of the network design shared by Bitcoin-like systems." Its framing is about **Long Term Consensus Sustainability**: enabling removal of funds gives the network the ability to create "headroom" between the chain value and MAX_MONEY, and this "lays necessary groundwork for extending the block subsidy system, which currently has a clear final end date."
 
 That is the key idea, and it is worth slowing down for.
 
@@ -54,7 +54,7 @@ There are three possible destinations for coins taken out of circulation, and th
 
 - **Destroyed forever.** Supply shrinks permanently. Holders benefit; the security budget does not.
 - **Held in a reserve someone controls.** This funds the network but creates a treasury, and with it the governance question of who decides how it is spent.
-- **Returned automatically through future block subsidies.** This is what ZIP 233 intends. No human decides. The protocol reissues the funds on a schedule.
+- **Returned automatically through future block subsidies.** This is what ZIP 233 intends. No human decides. Under ZIP 234 the removed value simply enlarges the reserve that every future subsidy is computed from.
 
 That third option is what makes this a *sustainability* mechanism rather than a deflation mechanism. The ZIP says the funds will be "automatically and algorithmically reissued," and that word "algorithmically" is doing deliberate work: it is the absence of a committee.
 
@@ -62,15 +62,15 @@ That third option is what makes this a *sustainability* mechanism rather than a 
 
 ## An overview of ZIP 233
 
-ZIP 233 is a Consensus / Ecosystem ZIP with status Draft, owned by Jason McGee. It is one of three ZIPs sharing an author and a purpose:
+ZIP 233 is a Consensus / Ecosystem ZIP with status Draft. It shares its six owners, and its original author, with the other two ZIPs of the mechanism: Jason McGee, Zooko Wilcox, Mark Henderson, Tomek Piotrowski, Mariusz Pilarek and Paul Dann, with Nathan Wilcox as original author. The three share a purpose as well:
 
 - **ZIP 233** creates the ability to remove funds from circulation.
 - **ZIP 234** changes issuance to a smooth curve that can reissue removed funds.
-- **ZIP 235** removes 60% of transaction fees from circulation automatically.
+- **ZIP 235** removes at least 60% of transaction fees from circulation automatically.
 
 The ZIP names the combination: "This mechanism, in combination with ZIP 234 and ZIP 235, comprises a long-term strategy for the sustainability of the network. We will refer to the combined effects of these three ZIPs as the Network Sustainability Mechanism."
 
-Notably, it is written so the pieces do not have to arrive together. The intent is that removed funds are reissued "whether or not all three ZIPs comprising the Network Sustainability Mechanism are deployed in the same network upgrade."
+Notably, they need not arrive in the same upgrade: removed funds are intended to be reissued "whether or not all three ZIPs comprising the Network Sustainability Mechanism are deployed in the same network upgrade." The order is still constrained, since ZIP 234 and ZIP 235 each carry a MUST that they not be deployed before ZIP 233.
 
 ![ZIP 233 removes, ZIP 235 supplies the flow automatically, ZIP 234 reissues](/figures/zip-233-removing-funds-from-circulation/fig-3-nsm-loop.svg "Figure 3. The three ZIPs form a loop. ZIP 233 is the opening in the side of it.")
 
@@ -80,7 +80,7 @@ The mechanism is much smaller than the idea.
 
 ZIP 233 registers **bundle type 6, variant 0**, the "ZIP 233 NSM field", in the V7 transaction bundle type registry defined in ZIP 248. In that registry it has value pool deltas, but **no effecting data and no authorizing data**.
 
-In plain terms: it is not a new kind of transaction component with its own cryptography. There is nothing to prove and nothing to sign. The amount to be removed appears solely as an entry in the transaction's value pool deltas, and the consensus rules do the rest.
+In plain terms: it is not a new kind of transaction component with its own cryptography. There is no proof and no separate signature. The amount still cannot be tampered with, because it "is committed to the transaction identifier and signature digest", so the transaction's existing authorizations cover it. Three consensus rules apply: the asset class must be ZEC, the value pool delta must be nonpositive, and the amount must be within 0 to MAX_MONEY.
 
 What the rest amounts to is the important sentence: the amount "does not result in an output being produced in any chain value pool, and therefore from the point at which the transaction is applied to the global chain state, [it] is subtracted from the issued supply. It is unavailable for circulation on the network at least through to the end of the block in which the transaction is mined."
 
@@ -110,7 +110,7 @@ This is the quiet virtue. A chain wanting to extend its security budget could cr
 
 ### Holders benefit without opting in
 
-The Motivation makes a modest claim about this: reducing the circulating supply may contribute to the value of the remaining ZEC, benefiting holders "in proportion to their holdings, without requiring them to opt into any scheme, introducing extra risk, active oversight, or accounting complexity."
+The Motivation makes a modest claim about this: reducing the circulating supply may contribute to the value of the remaining ZEC, benefiting network users "in proportion to their holdings" and, in the ZIP's words, "without requiring them to opt into any scheme, introducing extra risk, active oversight, or accounting complexity."
 
 The hedging there is appropriate and worth noting. It says *potentially contributes* and *can be argued*. This is not a promise about price.
 
@@ -122,9 +122,11 @@ This is the central risk, and it follows from the ZIP's own design. ZIP 233 remo
 
 If ZIP 233 activates and ZIP 234 does not, then ZEC gets removed from circulation with no mechanism to bring it back. The intent is recorded in a document; the behaviour is permanent destruction. Intent is not a consensus rule.
 
-Whether that matters depends on how much is removed, which depends on whether ZIP 235 also ships. Ordinary voluntary removals will likely be negligible. A 60% cut of all transaction fees would not be.
+The ordering is constrained in one direction. Both companions carry a MUST: ZIP 234 "MUST be deployed at the same time or after ZIP 233", and ZIP 235 says the same. So nothing can reissue or supply before the removal mechanism exists. Nothing compels ZIP 234 to ship at all, which is the gap that matters.
 
-I would want the deployment order stated somewhere binding, and I could not find it in the ZIP.
+Whether that matters depends on how much is removed. At today's fee levels, not much: ZIP 235 works the numbers and puts its own flow at "210.864 ZEC per year", which against annual issuance of roughly 657,000 ZEC is about 0.03%. ZIP 235 says as much, noting fees are "currently small enough that the reduction in miner fees is unlikely to be a concern." The exposure grows only if fee revenue grows, which is exactly the world the Network Sustainability Mechanism is designed for.
+
+
 
 ### "Voluntary" is doing a lot of work
 
@@ -137,6 +139,14 @@ That is not voluntary from the fee payer's point of view. The mechanism is volun
 The whole NSM rests on the belief that fee-only security is insufficient. That is a widely shared belief, and it is still a belief. No chain has reached the end of its subsidy, so the counterfactual cannot be observed.
 
 If the premise is wrong, the mechanism is a complication with no benefit. If it is right, waiting until the evidence arrives means acting too late. The ZIP is choosing under uncertainty, which is reasonable, but the uncertainty should not disappear from the discussion.
+
+### It is a new distinguisher, and the ZIP says so
+
+For a privacy chain this is the drawback that should come first, and ZIP 233 raises it itself. The mechanism "adds a new type of transparent transaction event that is fully visible to chain observers, and linked to other events performed in the transaction."
+
+Its own assessment of the consequence is candid: transactions that intentionally remove funds "are likely to represent a small fraction of Zcash transactions, and so this will provide another tool that adversaries may use to be able to segment users of the network."
+
+That is the cost of a voluntary mechanism: choosing to use it marks you. It matters less if ZIP 235 ships, since fee removal would then be routine rather than a choice.
 
 ### The accounting gets harder to follow
 
@@ -171,5 +181,6 @@ Next in the series: ZIP 234, the smoothed issuance curve that coinholders declin
 - ZIP 234: Network Sustainability Mechanism: Issuance Smoothing. https://zips.z.cash/zip-0234
 - ZIP 235: Remove 60% of Transaction Fees From Circulation. https://zips.z.cash/zip-0235
 - ZIP 209: Prohibit Out-of-Range Chain Value Pool Balances. https://zips.z.cash/zip-0209
+- ZIP 248: Extensible Transaction Format. https://zips.z.cash/zip-0248
 - ZIP index, for statuses and the NU7 candidate list. https://zips.z.cash/
 - CoinDesk, "Zcash holders overwhelmingly back faster transactions and bitcoin-style halvings," 16 September 2026. https://www.coindesk.com/tech/2026/09/16/zcash-holders-overwhelmingly-back-faster-transactions-and-bitcoin-style-halvings

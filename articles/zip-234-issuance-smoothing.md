@@ -33,11 +33,11 @@ This is the ZIP that lost. It is worth reading anyway, and arguably more interes
 
 Every four years, Zcash's block subsidy is cut in half overnight. It is one of the most recognisable features Bitcoin gave the industry, and culturally it is enormous.
 
-ZIP 234 concedes the cultural point before arguing with it. Halvings, it says, "have since become culturally foundational." Then it makes its case: "abrupt reductions in miner revenue can lead to short-term drops in mining participation, as evidenced by hashrate/difficulty."
+ZIP 234 concedes the cultural point before arguing with it. Halvings, it says, "have since become culturally foundational," Then it makes its case: "abrupt reductions in miner revenue can lead to short-term drops in mining participation, as evidenced by hashrate/difficulty."
 
 And it brings evidence rather than theory. Following the 18 November 2020 halving, the ZIP records that weekly difficulty fell about 20.6% within roughly a week.
 
-That is the mechanism the proposal is aimed at. Miner revenue halves instantly. Some miners become unprofitable instantly. They leave, hash rate drops, and the chain is measurably less expensive to attack until difficulty readjusts and the market recovers. It is a self-inflicted security dip on a published schedule, which means it is also a dip anyone can plan around.
+That is the mechanism the proposal is aimed at. Miner revenue halves instantly. Some miners become unprofitable instantly. They leave, hash rate drops, and the chain is cheaper to attack until difficulty readjusts and the market recovers. The ZIP is careful about how strongly it puts this, saying the observed drops are "consistent with discrete subsidy cuts producing measurable reductions in mining participation." It is a self-inflicted security dip on a published schedule, which means it is also a dip anyone can plan around.
 
 ![A halving drops miner revenue in one step; a smooth curve declines continuously](/figures/zip-234-issuance-smoothing/fig-1-step-vs-curve.svg "Figure 1. The same declining issuance, delivered two ways. The step is the thing ZIP 234 objects to.")
 
@@ -47,7 +47,7 @@ There is a second problem, and for the Network Sustainability Mechanism it is th
 
 A halving schedule is a function of block height alone. Height 1 pays this, height 2 million pays that, forever. It cannot respond to anything.
 
-ZIP 233 lets ZEC be removed from circulation, with the intention that it returns through future block subsidies. But a fixed schedule has nowhere to put returning funds. It does not know they exist. As ZIP 234's motivation puts it: the current schedule "does not provide a way to recycle funds removed from circulation via ZIP-233 into future issuance."
+ZIP 233 lets ZEC be removed from circulation, with the intention that it returns through future block subsidies. But a fixed schedule has nowhere to put returning funds. It does not know they exist. As ZIP 234's motivation puts it: the current schedule "does not provide a way to 'recycle' funds removed from circulation via ZIP-233 into future issuance."
 
 So ZIP 234 is not an aesthetic preference for curves over steps. It is the component that closes the loop. Without it, ZIP 233 removes money and nothing brings it back.
 
@@ -57,7 +57,7 @@ The motivation then states the consequence of doing nothing: "Once scheduled iss
 
 ZIP 234 is a Consensus ZIP with status Draft, owned by Jason McGee, Zooko Wilcox, Mark Henderson, Tomek Piotrowski, Mariusz Pilarek and Paul Dann, with Nathan Wilcox as original author.
 
-The proposal replaces the step function with a curve defined as a fixed portion of the **Money Reserve** at a given block height. The Money Reserve is, in effect, the unissued space beneath the cap: what MAX_MONEY permits minus what is currently in circulation.
+The proposal replaces the step function with a curve defined as a fixed portion of the **Money Reserve** at a given block height. The Money Reserve is MAX_MONEY minus the issued supply, where issued supply means the total value in all chain value pool balances at that height. Removed ZEC never enters a pool, so it never counts towards issued supply, which is the mechanism by which removals enlarge the reserve.
 
 Each block pays:
 
@@ -69,7 +69,7 @@ That single line has some elegant consequences.
 
 **It is self-limiting.** The subsidy is always a fraction of what remains unissued, so issuance approaches the cap and never crosses it. The ZIP retains "the overall supply cap of MAX_MONEY."
 
-**It never quite ends.** A fixed fraction of a shrinking reserve gets smaller forever without reaching zero. There is no terminal block after which miners are paid nothing.
+**It pushes the end a long way out, but there is still an end.** Because each subsidy is rounded up to a whole zatoshi, the reserve is eventually exhausted rather than shrinking forever. The ZIP's own simulation is specific: "Last block is 47917869 in ~113.88 years", after which "the block subsidy will be 0 ZEC." That figure assumes no ZEC is ever removed from circulation. Every removal pushes it further out, which is the whole point of pairing this with ZIP 233.
 
 **It reacts to removals automatically.** When ZIP 233 removes ZEC, the Money Reserve grows, so the subsidy grows. That is the reissuance mechanism: not a separate system, just the same formula applied to a larger reserve.
 
@@ -77,19 +77,19 @@ That single line has some elegant consequences.
 
 The ZIP lists its objectives plainly, and they are unusually legible for an economics proposal: introduce a way for users to contribute to sustainability; enable removed ZEC to be reissued; retain the 21 million cap; keep the issuance rate similar to Zcash's history; make issuance easy to understand and predict; and activate at a block where the change from current issuance is as small as possible.
 
-That last one is a nice piece of engineering judgement. The deployment height is not arbitrary. It is chosen as "the lowest height after the second halving at which the NSM issuance would be less than the current BTC-style issuance," assuming nothing has been removed. In other words, switch over at the moment the curve crosses below the steps, so nobody can claim the change was an inflation increase in disguise.
+That last one is a nice piece of engineering judgement. The deployment height is not arbitrary. The spec gives two criteria: it must be after the NU7 activation height, and it is "the lowest height after the second halving at which the NSM issuance would be less than the current BTC-style issuance", assuming nothing has been removed. In other words, switch over at the moment the curve crosses below the steps. That is not quite the same as no change in issuance, and the ZIP says so: with a pre-defined constant, "issuance will jump up some amount at activation", equal to all ZEC removed before that height multiplied by the fraction. The spec's worked example is 100,000 ZEC removed giving an extra 0.04126 ZEC per block.
 
 ## How it works
 
 ### The calculation
 
-For each block, take the Money Reserve at that height and pay out 0.0000004126 of it. The reserve shrinks as coins are issued, so the per-block subsidy declines smoothly. The result approximates today's issuance over four-year intervals, assuming nothing is removed.
+For each block, take the Money Reserve as it stood after the previous block and pay out 0.0000004126 of it, rounded up to the next zatoshi. That rounding matters: it is what guarantees a non-zero subsidy while the reserve lasts, and it is also why the reserve eventually empties instead of halving forever. The reserve shrinks as coins are issued, so the per-block subsidy declines smoothly. The result approximates today's issuance over four-year intervals, assuming nothing is removed.
 
 Because the subsidy depends on the reserve rather than on height alone, anything that changes the reserve changes future issuance. Removals raise it. That is the whole design.
 
 ### Interaction with the block time change
 
-Worth noting alongside ZIP 218, which we covered last time: if blocks arrive three times more often, a per-block fraction of the reserve would pay out three times as fast. ZIP 218 handles issuance rescaling on its side, keeping daily ZEC constant. Any deployment of both would need those two mechanisms reconciled. Both are NU7 candidates, so this is not hypothetical.
+Worth noting alongside ZIP 218, which we covered last time: if blocks arrive three times more often, a per-block fraction of the reserve would pay out three times as fast. ZIP 218 handles issuance rescaling on its side, dividing the per-block subsidy by a further factor of three "so that the total issuance per unit of wall clock time remains the same." But it rescales the halving-based formula, and ZIP 234 replaces that formula outright at its deployment height. ZIP 218's only reference to ZIP 234 concerns a rounding loss of 0.33 zatoshi per block. So neither spec reconciles the two, and this is my own reading rather than something either document addresses. Both are NU7 candidates, so it is not hypothetical.
 
 ### What holders were actually asked
 
@@ -103,19 +103,23 @@ The answers: **98.9%** of participating ZEC voted to keep halvings, and **96.6%*
 
 ### It removes a scheduled security dip
 
-The strongest argument is the empirical one. A 20.6% weekly difficulty decline after the 2020 halving is a measurable, repeating, pre-announced weakening of the chain. A smooth curve makes miner revenue decline gradually enough that individual operators fall out continuously rather than all at once.
+The strongest argument is the empirical one, and the ZIP has more than one data point. After the 2020 halving, weekly difficulty fell about 20.6%, and was still about 9.1% lower around 30 days later. After the 2024 halving it fell about 17% within roughly a week and about 23% around 30 days later. That is a pre-announced weakening of the chain that has now happened twice. A smooth curve makes miner revenue decline gradually enough that individual operators fall out continuously rather than all at once.
 
 ### It is the only part that makes removals reversible
 
 Without ZIP 234, ZIP 233 is a burn mechanism with a sentence of good intentions attached. The curve is what turns removal into a loop. Anyone who supports the Network Sustainability Mechanism in principle has to support something shaped like this ZIP.
 
-### The security budget never hits zero
+### It moves the cliff, and keeps moving it
 
-Bitcoin's design has a date after which miners are paid only by fees. A fixed fraction of a shrinking reserve declines forever without terminating, which converts a cliff into an asymptote. Whether fee-only security would have worked is unknown; this ZIP arranges not to find out.
+Bitcoin's design has a date after which miners are paid only by fees. ZIP 234 does not abolish that date: its simulation puts the last subsidised block at height 47,917,869, about 113.88 years away, assuming nothing is ever removed from circulation.
+
+What it does is turn a fixed date into one that recedes. Every ZIP 233 removal enlarges the reserve, and a larger reserve means a longer tail. The ZIP's motivation is blunt about the alternative: "Once scheduled issuance ends, the network becomes reliant on transaction fees for the security budget."
 
 ### The cap survives
 
-This is the part most likely to be misread, so it is worth being blunt: ZIP 234 does not raise the 21 million cap. It retains it. The curve approaches the cap and never crosses it, because the subsidy is always a fraction of what is left.
+This is the part most likely to be misread, so it is worth being precise: ZIP 234 does not change the consensus constant. It retains "the overall supply cap of MAX_MONEY."
+
+One caveat the ZIP raises itself. MAX_MONEY corresponds to 21,000,000 ZEC, and the ZIP notes this "is slightly larger than the supply cap for the current issuance mechanism, but is the value used in existing critical consensus checks." Since the reserve does eventually deplete, the total ever issued under ZIP 234 would end up slightly above what today's schedule would produce. The constant is untouched; the eventual supply is not identical.
 
 ## Are there any drawbacks to implementing ZIP 234?
 
@@ -139,9 +143,9 @@ Holders voted to postpone reissuance to February 2031. If ZIP 233 or ZIP 235 shi
 
 During that window the Network Sustainability Mechanism is, functionally, a burn. That may be exactly what holders wanted, since removals reduce supply and reissuance increases it. It is worth being clear that it is the opposite of what the three ZIPs were designed to do together.
 
-### One author, three ZIPs, one economic thesis
+### Three ZIPs, one economic thesis
 
-Jason McGee owns all three NSM ZIPs. Concentrated authorship makes a coherent design and also means one worldview shapes all three documents. ZIP 234 has since gained co-owners including Zooko Wilcox, which broadens it. It is still a single thesis about how chains should be funded, and the vote suggests the thesis is not yet shared by the people paying for it.
+All three NSM ZIPs carry the same six owners and the same original author. That makes for a coherent design, and it also means one thesis about how chains should be funded shapes every part of the mechanism. The vote suggests the thesis is not yet shared by the people paying for it.
 
 ## Where this stands
 
@@ -155,7 +159,7 @@ The more likely path is that the NSM survives in pieces: removal without smoothi
 
 ZIP 234 is a careful proposal that lost on the part that was never really technical.
 
-Its mechanism is neat: pay each block a fixed fraction of what is left, and you get smooth decline, a preserved cap, no terminal block, and automatic reissuance of anything removed, all from one constant. Its evidence is concrete, with a 20.6% difficulty drop after a halving. And it is the only component that makes the rest of the Network Sustainability Mechanism a loop instead of a drain.
+Its mechanism is neat: pay each block a fixed fraction of what is left, and you get smooth decline, a preserved cap, a subsidy tail that lengthens with every removal, and automatic reissuance, all from one constant. Its evidence is concrete, with a 20.6% difficulty drop after a halving. And it is the only component that makes the rest of the Network Sustainability Mechanism a loop instead of a drain.
 
 Against that, halvings are a story people bought into, and the four-year rhythm is legible in a way a fraction of a reserve never will be. 98.9% of participating ZEC chose the story.
 
@@ -174,4 +178,3 @@ Next in the series: ZIP 231, memo bundles, which makes Zcash memos bigger, cheap
 - ZIP 218: 25-second Block Target Spacing. https://zips.z.cash/zip-0218
 - ZIP index, for statuses and the NU7 candidate list. https://zips.z.cash/
 - CoinDesk, "Zcash holders overwhelmingly back faster transactions and bitcoin-style halvings," 16 September 2026. https://www.coindesk.com/tech/2026/09/16/zcash-holders-overwhelmingly-back-faster-transactions-and-bitcoin-style-halvings
-- Zcash Labs, NU7 coinholder vote page. https://zcashlabs.org/voting
