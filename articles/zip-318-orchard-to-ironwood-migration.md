@@ -10,11 +10,11 @@ zip_category: Wallet
 spec_url: https://zips.z.cash/zip-0318
 tag: NU6.3
 date: 2026-09-20
-status: published
+status: draft
 disclosure: >-
-  Researched with AI assistance, working from the ZIP text and the sources listed at
-  the end. Every number, quotation and mechanism was checked against those sources in
-  two further review passes. Any errors are the author's own.
+  Researched with AI assistance, working from the ZIP text and the sources
+  listed at the end. Every number, quotation and mechanism was checked against
+  those sources in two further review passes. Any errors are the author's own.
 corrections: []
 cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 ---
