@@ -212,7 +212,7 @@ This is where the pure-function breakdown earns a mention. After a reinstall, or
 
 > "The security analysis of migration strategies is subtle, and the more obvious strategies leak significant information ..." (ZIP 318, Motivation)
 
-## Why ZIP 318? The case for the design
+## Why ZIP 318? The case for crossing in canonical amounts
 
 ### Collision beats randomness
 
@@ -242,7 +242,7 @@ A canonical migration transaction is built to look like an Orchard to Ironwood s
 
 The alternative the authors considered was a guided flow that creates each transfer when the user opens the app. It was dismissed because every broadcast would coincide with an app open and with the scan requests the server already sees. The scheduled design can fail, if background tasks never run and the user sends everything from the catch-up prompt. In that case it performs like the guided flow. When the background tasks do run, it performs much better.
 
-## Are there any drawbacks?
+## Are there any drawbacks to implementing ZIP 318?
 
 I promised the best arguments against. Here they are, and most of them come from people who worked on the migration.
 
@@ -308,7 +308,7 @@ The rush is over. Those 22,886 transactions work out to about 420 a day across t
 
 That tail matters for anyone who has not migrated yet. The design depends on a crowd, and the crowd is thinning. The ZIP's own analysis notes that in the first days after activation privacy rested "on cohort size" because every migrating wallet shared the same few anchors. Latecomers still draw from the same small window of recent anchors. My reading is that what they lack is company inside each cohort, and that for a late migrator the Shielded Labs advice about network-level privacy carries more weight than it did in July.
 
-## Conclusion
+## Conclusion: ZIP 318 and the price of a public amount
 
 ZIP 318 is a careful answer to a narrow question: if an amount must be public, how do you keep it from pointing at you? Its answer is to stop trying to be unpredictable and start trying to be common. Standard amounts, a standard transaction shape, shared anchors and shared expiry heights all push in one direction, which is making one wallet's transfers look like everyone's.
 

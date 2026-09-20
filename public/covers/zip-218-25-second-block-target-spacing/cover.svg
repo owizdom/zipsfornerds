@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="One wide block above, three narrow blocks below, spanning the same width">
+<rect width="800" height="600" fill="#16150f"/>
+<text x="400" y="128" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" letter-spacing="5" fill="#f6f1e7" opacity=".55">75 SECONDS</text>
+<rect x="130" y="168" width="540" height="96" fill="#6a665a"/>
+<text x="400" y="330" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="15" letter-spacing="5" fill="#f6f1e7" opacity=".55">25 SECONDS</text><rect x="130" y="368" width="168" height="96" fill="#f4b728"/><rect x="316" y="368" width="168" height="96" fill="#f4b728"/><rect x="502" y="368" width="168" height="96" fill="#f4b728"/><text x="400" y="546" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="16" letter-spacing="5" fill="#f6f1e7" opacity=".8">THREE TIMES THE BLOCKS</text></svg>
