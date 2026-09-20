@@ -1,4 +1,5 @@
 // Test gate: build the site from fixtures, run every test, and trip on zero tests or any skip (AT9).
+// AT11 runs a second build into .next-dirty and AT15 starts a production server, so a full run takes a few minutes.
 import { spawnSync } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

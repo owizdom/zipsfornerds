@@ -1,8 +1,7 @@
 import type { NextConfig } from 'next'
 
 const config: NextConfig = {
-  output: 'export',
-  trailingSlash: true,
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   images: { unoptimized: true },
   turbopack: { root: import.meta.dirname },
 }

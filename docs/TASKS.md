@@ -3,4 +3,5 @@
 | Track | Owner | Owns | Status |
 |---|---|---|---|
 | site-v1 (spec 0001) | Claude Fable 5.1, one session | app/ lib/ tests/ scripts/ public/ zips/ | built, gate green, awaiting reviewer + Wisdom |
-| article-01 ZIP 318 | Claude Fable 5.1 draft, Wisdom edits | articles/zip-318-*.md, public/figures/zip-318/ | DRAFT. Fact-check pass 1 applied. Pass 2 pending. Not published |
+| article-01 ZIP 318 | Claude Fable 5.1 draft, Wisdom edits | articles/zip-318-*.md, public/figures/zip-318/ | DRAFT. Fact-check passes 1 and 2 applied (pass 2 verdict: safe to send to the ZIP owners). Not published |
+| site-v2 (spec 0002) | Claude Fable 5.1, one session | app/ components/ keystatic.config.ts lib/cms.ts public/covers/ | built, gate 14/14 green x3, reviewer running |
