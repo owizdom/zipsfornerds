@@ -10,7 +10,7 @@ zip_category: Wallet
 spec_url: https://zips.z.cash/zip-0318
 tag: NU6.3
 date: 2026-09-20
-status: draft
+status: published
 disclosure: >-
   Researched with AI assistance, working from the ZIP text and the sources
   listed at the end. Every number, quotation and mechanism was checked against
