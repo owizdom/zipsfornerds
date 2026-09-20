@@ -23,7 +23,8 @@
 
 - No deployment, DNS or GitHub App creation. Those need Wisdom.
 - No copied Schema assets, copy, logo or cartoon covers. No reader-logo wall.
-- No database, no accounts, no comments, no analytics.
+- No database, no accounts, no comments.
+- Analytics is opt-in and off by default (added 20 Sep 2026 at Wisdom's request, for the grant's readership metrics). Google Analytics is the one permitted exception to the zero-third-party rule, and only when `NEXT_PUBLIC_GA_ID` is set.
 - Article #1 stays a draft.
 
 ## 3. Stack
@@ -63,6 +64,7 @@ keystatic.config.ts storage: github when NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO is se
 | AT12 | No personal name | "Wisdom" and "Okechukwu" appear in no prerendered page, feed or site source file under app/, components/ and lib/ |
 | AT13 | Schema structure present | home has hero diagram, recent publications, scheduled grid, how-we-work cards; archive has filter chips and a sort control; article has cover card and outline |
 | AT14 | CMS wired | `keystatic.config.ts` declares the articles collection with every frontmatter key the loader reads, and the zips singleton; `/keystatic` and the API route exist in the build manifest |
+| AT16 | Privacy claim matches reality | with analytics off: footer claims no trackers and no third-party script loads; with `NEXT_PUBLIC_GA_ID` set: the script loads, the measurement id reaches the page, and the footer names the provider instead of claiming no trackers |
 | AT15 | CMS is not an open door | in a production server started without GitHub credentials, `/api/keystatic/...` does not serve repository files |
 | AT9 | Tripwire | zero tests or any skip fails the run |
 | AL1 | Looks right at 390px and 1280px, side by side with schemaresearch.xyz | L |
