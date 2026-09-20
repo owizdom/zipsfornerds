@@ -5,7 +5,7 @@ subtitle: >-
   How a Zcash wallet walks your money through a turnstile everyone can see,
   without showing anyone it was yours.
 zip: 318
-zip_status: Active
+zip_status: Draft
 zip_category: Wallet
 spec_url: https://zips.z.cash/zip-0318
 tag: NU6.3
