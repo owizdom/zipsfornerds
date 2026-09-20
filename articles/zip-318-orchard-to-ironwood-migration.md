@@ -11,7 +11,7 @@ spec_url: https://zips.z.cash/zip-0318
 tag: NU6.3
 date: 2026-09-20
 status: published
-disclosure: '[YOUR CALL, MUST BE TRUE ON THE DAY YOU PUBLISH]'
+disclosure: Ok
 corrections: []
 cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 ---
