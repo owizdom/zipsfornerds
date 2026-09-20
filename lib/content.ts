@@ -23,7 +23,6 @@ export type Article = {
   status: 'draft' | 'published'
   cover: string
   tag: string
-  reviewedBy: string
   disclosure: string
   corrections: string[]
   readingMinutes: number
@@ -78,7 +77,6 @@ function load(file: string): Article {
     status: data.status === 'published' ? 'published' : 'draft',
     cover: data.cover ?? '',
     tag: data.tag ?? '',
-    reviewedBy: data.reviewed_by ?? '',
     disclosure: data.disclosure ?? '',
     corrections: Array.isArray(data.corrections) ? data.corrections.map(String) : [],
     readingMinutes: Math.max(1, Math.round(content.split(/\s+/).length / 230)),

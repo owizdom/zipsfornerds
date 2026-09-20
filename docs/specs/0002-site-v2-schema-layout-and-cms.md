@@ -68,6 +68,7 @@ keystatic.config.ts storage: github when NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO is se
 | AT15 | CMS is not an open door | in a production server started without GitHub credentials, `/api/keystatic/...` does not serve repository files |
 | AT17 | Hostile content is inert | a published article whose caption, alt text, links and raw HTML all attempt injection builds successfully and emits no script tag, no `javascript:` or `data:text/html` URL and no inline event handler |
 | AT18 | Production ignores SHOW_DRAFTS | a production build with `SHOW_DRAFTS=1` still produces no draft route, title or slug |
+| AT19 | No owner-review promise | the strings "reviewed by", "owner_review" and the owner-review sentences appear in no page and no site source file |
 | AT9 | Tripwire | zero tests or any skip fails the run |
 | AL1 | Looks right at 390px and 1280px, side by side with schemaresearch.xyz | L |
 

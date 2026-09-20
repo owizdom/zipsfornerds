@@ -32,7 +32,6 @@ export default config({
           options: [{ label: 'Draft', value: 'draft' }, { label: 'Published', value: 'published' }],
           defaultValue: 'draft',
         }),
-        reviewed_by: fields.text({ label: 'Reviewed by', description: 'Name the ZIP owner who reviewed it, or say that nobody has yet.' }),
         disclosure: fields.text({ label: 'AI disclosure', multiline: true, description: 'Must be true on the day you publish.' }),
         corrections: fields.array(fields.text({ label: 'Correction, starting with the date' }), { label: 'Corrections log', itemLabel: (p) => p.value || 'New correction' }),
         cover: fields.image({ label: 'Cover image', directory: 'public/covers', publicPath: '/covers/' }),

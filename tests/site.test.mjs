@@ -48,7 +48,7 @@ test('AT2 drafts never ship', () => {
 
 test('AT3 article page carries its accountability block', () => {
   const html = read('research/published-fixture.html')
-  for (const needle of ['ZIP 9999', 'Proposed', 'Reviewed by', 'Fixture Reviewer', 'Corrections', 'fixed a fixture typo', 'Disclosure', 'Fixture disclosure text', 'Sources']) {
+  for (const needle of ['ZIP 9999', 'Proposed', 'Corrections', 'fixed a fixture typo', 'Disclosure', 'Fixture disclosure text', 'Sources']) {
     assert.ok(html.includes(needle), `article page missing "${needle}"`)
   }
 })
@@ -124,7 +124,7 @@ test('AT13 the schema-style structure is present', () => {
 
 test('AT14 the CMS is wired', () => {
   const cfg = fs.readFileSync(path.join(root, 'keystatic.config.ts'), 'utf8')
-  for (const key of ['title', 'series_number', 'subtitle', 'zip', 'zip_status', 'zip_category', 'spec_url', 'date', 'status', 'reviewed_by', 'disclosure', 'corrections', 'cover', 'tag', 'content']) {
+  for (const key of ['title', 'series_number', 'subtitle', 'zip', 'zip_status', 'zip_category', 'spec_url', 'date', 'status', 'disclosure', 'corrections', 'cover', 'tag', 'content']) {
     assert.match(cfg, new RegExp(`\\b${key}\\s*:`), `keystatic.config.ts has no field "${key}"`)
   }
   assert.match(cfg, /path:\s*'articles\/\*'/, 'articles collection must write to articles/')
@@ -225,4 +225,13 @@ test('AT18 a production build ignores SHOW_DRAFTS', () => {
   }
   const rss = fs.readFileSync(path.join(dir, 'rss.xml.body'), 'utf8')
   assert.equal((rss.match(/<item>/g) || []).length, 1, 'RSS should still carry only the published fixture')
+})
+
+test('AT19 the site makes no owner-review promise', () => {
+  const banned = [/reviewed by/i, /owner_review/i, /owners before it is published/i, /owners see it first/i, /wrote the ZIP/i]
+  const sources = ['app', 'components', 'lib'].flatMap((d) => walk(path.join(root, d))).filter((f) => /\.(tsx?|css)$/.test(f))
+  for (const f of pages().concat(sources)) {
+    const text = fs.readFileSync(f, 'utf8')
+    for (const b of banned) assert.ok(!b.test(text), `${path.relative(root, f)} still promises owner review (${b})`)
+  }
 })

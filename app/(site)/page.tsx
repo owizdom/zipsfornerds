@@ -6,7 +6,7 @@ import { site } from '@/lib/site'
 
 const work = [
   ['01 / ONE_ZIP_PER_ARTICLE', 'One ZIP, start to finish', 'Every article opens with a plain-language summary, then covers the background, the mechanism, the case for the ZIP and the strongest case against it.'],
-  ['02 / OWNER_REVIEW', 'Read by the people who wrote the ZIP', 'Each draft goes to the ZIP’s owners before it is published. The page says who reviewed it, or says plainly that nobody has yet.'],
+  ['02 / CHECKED_AGAINST_THE_SPEC', 'Every claim checked against the ZIP text', 'Numbers, quotations and mechanisms are checked against the specification and the linked sources before publication. Every article lists its sources.'],
   ['03 / PUBLIC_CORRECTIONS', 'Corrections at the top, with dates', 'ZIPs change after an explainer is written. When an article is fixed or updated, the change is logged where readers will see it.'],
   ['04 / PROTOCOL_ONLY', 'No price talk, no advocacy', 'If a ZIP has a serious objection on the record, the article carries it. Every article says how AI tools were used in making it.'],
 ]

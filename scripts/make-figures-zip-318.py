@@ -125,11 +125,11 @@ write('fig-8-sync-vs-broadcast.svg', svg(960, 326, b, 'Sync and broadcast happen
       'Background windows alternate between syncing and broadcasting so that a server cannot pair a wallet sync with a migration transaction.'))
 
 # FIG 9: migration progress (data figure: one stacked bar, direct labels, 2px surface gap, 4px rounded ends)
-mig, rem = 3223058, 410124
+mig, rem = 3223060, 410123
 W = 840; mw = round(W * mig / (mig + rem)); rw = W - mw - 2
 b = (f'<text x="40" y="42" class="m">FIG. 9 / HOW MUCH OF ORCHARD HAS CROSSED (CIPHERSCAN, 20 SEPT 2026)</text>'
-     f'<text x="60" y="92" class="sb">3,223,058 ZEC migrated to Ironwood</text><text x="900" y="92" class="sb" text-anchor="end">410,124 ZEC still in Orchard</text>'
+     f'<text x="60" y="92" class="sb">3,223,060 ZEC migrated to Ironwood</text><text x="900" y="92" class="sb" text-anchor="end">410,123 ZEC still in Orchard</text>'
      f'<rect x="60" y="108" width="{mw}" height="46" rx="4" fill="{GOLDD}"/><rect x="{60+mw+2}" y="108" width="{rw}" height="46" rx="4" fill="{BLUE}"/>'
      f'<text x="60" y="182" class="m">88.7% OF THE ORCHARD SUPPLY</text><text x="900" y="182" class="m" text-anchor="end">11.3%</text>')
 write('fig-9-migration-progress.svg', svg(960, 210, b, 'Share of the Orchard supply that has migrated to Ironwood',
-      '3,223,058 ZEC, 88.7 percent of the Orchard supply, has migrated to Ironwood. 410,124 ZEC, 11.3 percent, remains in Orchard. Source CipherScan, 20 September 2026.'))
+      '3,223,060 ZEC, 88.7 percent of the Orchard supply, has migrated to Ironwood. 410,123 ZEC, 11.3 percent, remains in Orchard. Source CipherScan, 20 September 2026.'))
