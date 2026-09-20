@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 402" width="960" height="402" role="img" aria-labelledby="t d">
-<title id="t">Funds move from older pools into Ironwood, where they could be recovered</title><desc id="d">Funds in Sprout, Sapling, Orchard or transparent addresses would be inaccessible once those protocols are disabled. Moving them into the Ironwood pool makes them recoverable by a future protocol.</desc>
+<title id="t">Funds move from older pools into Ironwood, where they could be recovered</title><desc id="d">Funds left in the Sprout, Sapling or Orchard pools would be inaccessible once those protocols are disabled. Transparent balances have no protocol to disable, but the ZIP still tells wallets to move them. Funds in the Ironwood pool could be recovered by a future protocol.</desc>
 <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16150f"/></marker>
 <marker id="arrx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c98500"/></marker></defs>
 <rect width="960" height="402" fill="#f6f1e7"/>

@@ -13,15 +13,15 @@ b += label(70, 76, 'MAX_MONEY, 21 million ZEC. This line never moves.', 'sm', 's
 # before
 b += f'<rect x="120" y="120" width="260" height="190" fill="{MUTED}"/>' + label(250, 230, 'issued', 'mi').replace('class="mi"','class="mi" fill="#ffffff"')
 b += f'<rect x="120" y="96" width="260" height="24" fill="none" stroke="{MUTED}" stroke-width="1.5" stroke-dasharray="5 4"/>'
-b += label(250, 340, 'Today', 'sb') + label(250, 364, 'little headroom left', 'xs')
+b += label(250, 340, 'Before', 'sb') + label(250, 364, 'issuance approaches the cap', 'xs')
 b += arrow(410, 210, 500, 210, gold=True) + label(455, 194, 'remove', 'm')
 # after
 b += f'<rect x="530" y="180" width="260" height="130" fill="{MUTED}"/>' + label(660, 252, 'issued', 'mi').replace('class="mi"','class="mi" fill="#ffffff"')
 b += f'<rect x="530" y="96" width="260" height="84" fill="{GOLD}" stroke="{INK}" stroke-width="1.5"/>' + label(660, 144, 'headroom', 'mi')
 b += label(660, 340, 'After removals', 'sb') + label(660, 364, 'space that future subsidies can use', 'xs')
-b += label(480, 404, 'The cap is not raised. The space beneath it is reopened.', 'sm')
+b += label(480, 404, 'Schematic, not to scale. The cap is not raised; the space beneath it is reopened.', 'sm')
 write(SLUG, 'fig-1-headroom.svg', svg(960, 428, b, 'Removing ZEC creates headroom below the unchanged 21 million cap',
-    'The MAX_MONEY cap of 21 million ZEC does not move. Removing coins from circulation widens the gap between issued supply and the cap, and that gap can fund future block subsidies.'))
+    'Schematic, not to scale. The MAX_MONEY cap of 21 million ZEC does not move. Removing coins from circulation widens the gap between issued supply and the cap, and that gap can fund future block subsidies.'))
 
 # FIG 2 — three destinations
 b = label(40, 42, 'FIG. 2 / THREE THINGS YOU CAN DO WITH REMOVED COINS', 'm', 'start')

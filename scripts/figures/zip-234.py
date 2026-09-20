@@ -39,14 +39,14 @@ write(SLUG, 'fig-1-step-vs-curve.svg', svg(960, 404, b, 'Halvings as a step func
 
 # FIG 2 — money reserve feedback
 b = label(40, 42, 'FIG. 2 / WHY THE CURVE CAN REISSUE REMOVED COINS', 'm', 'start')
-b += box(300, 78, 360, 80, DARK) + label(480, 110, 'Money Reserve', 'sb') + label(480, 136, 'what MAX_MONEY allows, minus what exists', 'xs')
+b += box(300, 78, 360, 80, DARK) + label(480, 110, 'Money Reserve', 'sb') + label(480, 136, 'MAX_MONEY minus the issued supply', 'xs')
 b += arrow(480, 162, 480, 212)
 b += box(300, 216, 360, 80, GOLD) + label(480, 248, 'Block subsidy', 'sb') + label(480, 274, '0.0000004126 of the reserve, each block', 'xs')
 b += f'<path d="M300 256 Q150 256 150 118 Q150 118 296 118" fill="none" stroke="{GOLDD}" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrx)"/>'
 b += label(70, 190, 'ZIP 233', 'sb', 'start') + label(70, 214, 'removals enlarge', 'xs', 'start') + label(70, 234, 'the reserve', 'xs', 'start')
 b += box(700, 216, 200, 80, PAPER, dash=True) + label(800, 248, 'issued supply', 'sm') + label(800, 272, 'approaches the cap,', 'xs') + label(800, 290, 'never crosses it', 'xs')
 b += arrow(665, 256, 696, 256)
-b += label(480, 348, 'One constant gives smooth decline, a preserved cap, no terminal block and automatic reissuance.', 'sm')
+b += label(480, 348, 'One constant gives smooth decline, a preserved cap and automatic reissuance. Every removal lengthens the tail.', 'sm')
 write(SLUG, 'fig-2-money-reserve.svg', svg(960, 372, b, 'The block subsidy is a fixed fraction of the Money Reserve',
     'Each block pays a fixed fraction of the Money Reserve. Removing coins enlarges the reserve, which raises future subsidies, so removed funds are reissued automatically.'))
 

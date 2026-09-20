@@ -48,9 +48,9 @@ for i in range(12):
     b += f'<rect x="{250+i*55}" y="186" width="40" height="56" fill="{GOLD}" stroke="{INK}" stroke-width="1.2" rx="3"/><text x="{270+i*55}" y="221" class="mi" text-anchor="middle">⅓</text>'
 b += f'<line x1="250" y1="272" x2="910" y2="272" stroke="{INK}" stroke-width="2"/>'
 b += label(580, 300, 'one day', 'm')
-b += label(480, 348, 'Three times the blocks, one third of the reward each. Daily issuance is unchanged, and the halving schedule is untouched.', 'sm')
+b += label(480, 348, 'Three times the blocks, one third of the reward each. Daily issuance is unchanged; the halving interval triples to 5,040,000 blocks.', 'sm')
 write(SLUG, 'fig-3-issuance.svg', svg(960, 372, b, 'Daily ZEC issuance is unchanged, split across three times as many blocks',
-    'The same total ZEC is issued each day. With three times as many blocks, each block reward is one third the size. The halving schedule is not changed by this proposal.'))
+    'The same total ZEC is issued each day. With three times as many blocks, each block reward is one third the size. The halving interval is tripled in blocks so halvings stay four years apart.'))
 
 # COVER
 c = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="One wide block above, three narrow blocks below, spanning the same width">

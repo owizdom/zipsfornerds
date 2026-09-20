@@ -19,14 +19,14 @@ cover: /covers/zip-2002-explicit-fees/cover.svg
 
 ## The short version
 
-This is the smallest ZIP in the series so far, and it fixes a class of mistake that has cost people real money on Bitcoin for fifteen years.
+This is the smallest ZIP in the series so far, and it fixes a class of mistake that has cost people real money for as long as there has been a Bitcoin.
 
 - Today a Zcash transaction fee is **implicit**: it is whatever is left when you subtract the outputs from the inputs. You never state it.
 - That means forgetting a change output does not produce an error. It produces a very large fee, paid to a miner, irreversibly.
 - ZIP 2002 makes the fee **explicit** in the V7 transaction format, as an entry in the transparent value pool balance map from ZIP 248.
 - Because the fee is committed to via the txid, a hardware wallet can display the fee it is actually signing rather than recomputing it and hoping.
 - Light clients gain something too: they can read a transaction's fee without downloading and inspecting its transparent inputs.
-- It registers **bundle type 5, variant 0**, with no effecting data and no authorizing data. It is a Draft and an NU7 candidate, owned by Daira-Emma Hopwood.
+- It registers **bundle type 5, variant 0**, with no effecting data and no authorizing data. It is a Draft and an NU7 candidate, owned by Daira-Emma Hopwood, Kris Nuttycombe and Jack Grigg.
 
 ## Setting the stage: the fee you never write down
 
@@ -46,13 +46,15 @@ The principle it opens with is the one worth keeping: "When it comes to fee sele
 
 ## The problem with implicit arithmetic
 
-Beyond the obvious foot-gun, the ZIP names two consequences that matter more as Zcash grows up.
+The ZIP's Requirements section puts the goal more strongly than the motivation does, and it is worth quoting in full: "Parties that see a transaction, even in isolation, reliably know its fee. That is, the fee must be explicit in the encoding of the transaction, and no potentially error-prone calculations or additional chain data are needed to compute it."
+
+Two consequences follow, and both matter more as Zcash grows up.
 
 **Hardware wallets cannot show you the fee.** A hardware wallet's job is to display what you are about to authorise. With an implicit fee there is no fee to display: the device "must recompute the fee on its own and cannot simply display the value being committed to."
 
 Recomputing means trusting that it has been given complete and correct information about every input. That is exactly the assumption a hardware wallet exists to avoid. The security model of a signing device is that it shows you the truth independent of the computer it is plugged into, and an implicit fee undermines that at the most consequential moment.
 
-**Light clients cannot read fees.** To know what a transaction paid, you need its inputs' values, which means fetching and inspecting the transparent inputs. This ZIP makes it "possible for light clients to determine the fee paid by a transaction without needing to download and inspect transparent inputs."
+**Light clients cannot read fees.** To know what a transaction paid, you need its inputs' values, which means fetching and inspecting the transparent inputs. This ZIP makes it "possible for light clients to determine the fee paid by a transaction without needing to download and inspect transparent inputs to the transaction."
 
 That matters for wallets showing history, for explorers, and for anything trying to reason about fee markets without running a full node.
 
@@ -60,7 +62,7 @@ That matters for wallets showing history, for explorers, and for anything trying
 
 ## An overview of ZIP 2002
 
-ZIP 2002 is a Consensus ZIP with status Draft, owned by **Daira-Emma Hopwood**. It is an NU7 candidate and applies to the V7 transaction format.
+ZIP 2002 is a Consensus ZIP with status Draft, owned by **Daira-Emma Hopwood, Kris Nuttycombe and Jack Grigg**, crediting Simon Liu. It is proposed for deployment "with the next transaction version change, which is assumed to be V7".
 
 From the Abstract: it "makes the transaction fee explicit in the V7 transaction format, as an entry in the transparent transaction value pool balance map defined in ZIP 248. Instead of fees being implicit in the difference between the input value and output value of the transaction, all value transfers, including fee transfers to miners, will be explicit and committed to via the txid."
 
@@ -81,19 +83,19 @@ So fees leave ordinary transactions as a negative entry and arrive in the coinba
 
 There is not much to explain, which is the point.
 
-A V7 transaction includes a fee bundle. The fee bundle contributes an entry to `mValuePoolDeltas` with `bundleType = 5` and `assetClass = 0`, meaning ZEC. For an ordinary transaction that value is zero or negative. Consensus checks it.
+A V7 transaction includes a fee bundle. The fee bundle contributes an entry to `mValuePoolDeltas` with `bundleType = 5` and `assetClass = 0`, meaning ZEC. For an ordinary transaction that value is zero or negative. Two further rules apply: the asset class "MUST be 0. That is, fee amounts MUST be denominated in ZEC", and from NU7 the absolute value of the delta "MUST be in the range { 0 .. MAX_MONEY }".
 
 Because the entry is part of the transaction and the transaction is committed to by its txid, the fee is covered by the signature. A signing device can read it directly and show it, and any change to it changes the txid.
 
-Note what this does *not* do. It does not change how much fees cost; that is ZIP 317's job. It does not change who receives them. It changes only whether the number is stated or inferred.
+Note what this does *not* do. It does not change how much fees cost; that is ZIP 317's job. As far as I can tell it does not change who receives them either, though the ZIP does not discuss recipients. It changes only whether the number is stated or inferred.
 
 ## Why ZIP 2002? The case for writing the fee down
 
 ### It converts a silent failure into a visible one
 
-This is the whole argument and it is a good one. A forgotten change output currently produces a valid transaction with a catastrophic fee. With an explicit fee, the intended fee is stated, so software can compare stated against actual and refuse anything absurd before it is signed.
+This is the whole argument and it is a good one. A forgotten change output currently produces a valid transaction with a catastrophic fee. With an explicit fee the number is stated in the transaction, so software can compare it against what the user asked for and refuse anything absurd before signing. There is no second, implied figure to disagree with it: the stated value is the fee, and a transaction whose sums do not match it is invalid.
 
-Errors that announce themselves are in a completely different class from errors that succeed quietly. Bitcoin has a long history of accidental five-figure fees; every one of them was arithmetic doing exactly what it was told.
+Errors that announce themselves are in a completely different class from errors that succeed quietly. The ZIP cites one such case, a 2017 forum post titled "PLEASE HELP.. I sent a transaction with a 2.5 BTC transaction fee". It was arithmetic doing exactly what it was told.
 
 ### It fixes the hardware wallet story properly
 
@@ -109,9 +111,9 @@ A wallet can show what a transaction paid without fetching its inputs. Small, bu
 
 ## Are there any drawbacks to implementing ZIP 2002?
 
-### It only helps V7 transactions
+### It only helps the new transaction format
 
-The change applies to the V7 transaction format. Older formats keep implicit fees for as long as they are accepted, so the class of mistake persists on the old path until the old path goes away. That is unavoidable for a format change, and it means the benefit arrives gradually rather than at activation.
+The change applies to the next transaction version, assumed to be V7. Older formats keep implicit fees for as long as they are accepted, so the class of mistake persists on the old path until the old path goes away. That is unavoidable for a format change, and it means the benefit arrives gradually rather than at activation.
 
 ### Stating a number does not stop you stating the wrong one
 
@@ -131,7 +133,7 @@ The user-facing benefit arrives when wallets and hardware devices display the ex
 
 ZIP 2002 is a **Draft** and an NU7 candidate, and its fate is tied to the V7 transaction format landing.
 
-Among the NU7 candidates it is one of the least contentious. It does not change anyone's economics, it does not alter privacy properties, and it makes a category of expensive mistake harder. The kind of proposal that gets overlooked precisely because nobody objects to it.
+It does not change anyone's economics, it does not alter privacy properties, and it makes a category of expensive mistake harder. The kind of proposal that is easy to overlook because there is not much to argue about.
 
 ## Conclusion: ZIP 2002 and the oldest foot-gun in the book
 
@@ -139,7 +141,7 @@ ZIP 2002 is a one-line idea: write the fee down.
 
 Everything else follows. A hardware wallet can show you what you are signing rather than deriving it from data supplied by a machine you may not trust. A light client can read a fee without fetching inputs. And the oldest self-inflicted wound in Bitcoin-descended systems, the forgotten change output that turns into a life-changing fee, stops being a valid transaction that quietly does the wrong thing.
 
-The interesting thing about it is how long the implicit design survived. Fees-as-subtraction is elegant, and elegance is persuasive. It took fifteen years of people accidentally paying enormous fees for "make it explicit" to become the obvious answer.
+The interesting thing about it is how long the implicit design survived. Fees-as-subtraction is elegant, and elegance is persuasive. It took a long run of people accidentally paying enormous fees, including the 2.5 BTC transaction the ZIP cites from 2017, for "make it explicit" to become the obvious answer.
 
 
 As always, if this was useful, send it to anyone who has ever built a transaction by hand and held their breath.
@@ -151,4 +153,5 @@ That is the last article in this batch. The series continues with the remaining 
 - ZIP 2002: Explicit Fees. https://zips.z.cash/zip-2002
 - ZIP 317: Proportional Transfer Fee Mechanism. https://zips.z.cash/zip-0317
 - ZIP 233: Network Sustainability Mechanism: Removing Funds From Circulation, for the comparable bundle structure. https://zips.z.cash/zip-0233
+- ZIP 248: Extensible Transaction Format, the bundle type registry. https://zips.z.cash/zip-0248
 - ZIP index, for statuses and the NU7 candidate list. https://zips.z.cash/
