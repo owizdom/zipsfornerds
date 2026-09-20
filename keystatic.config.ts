@@ -32,7 +32,12 @@ export default config({
           options: [{ label: 'Draft', value: 'draft' }, { label: 'Published', value: 'published' }],
           defaultValue: 'draft',
         }),
-        disclosure: fields.text({ label: 'AI disclosure', multiline: true, description: 'Must be true on the day you publish.' }),
+        disclosure: fields.text({
+          label: 'AI disclosure',
+          multiline: true,
+          description: 'Shown on the article page. Edit it to match how this particular article was made, and make sure it is true on the day you publish.',
+          defaultValue: "Researched with AI assistance, working from the ZIP text and the sources listed at the end. Every number, quotation and mechanism was checked against those sources in two further review passes. Any errors are the author's own.",
+        }),
         corrections: fields.array(fields.text({ label: 'Correction, starting with the date' }), { label: 'Corrections log', itemLabel: (p) => p.value || 'New correction' }),
         cover: fields.image({ label: 'Cover image', directory: 'public/covers', publicPath: '/covers/' }),
         content: fields.markdoc({ label: 'Content', extension: 'md', options: { image: { directory: 'public/figures', publicPath: '/figures/' } } }),

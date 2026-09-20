@@ -7,10 +7,13 @@ import { fileURLToPath } from 'node:url'
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const run = (cmd, args, env = {}) => spawnSync(cmd, args, { cwd: root, encoding: 'utf8', env: { ...process.env, ...env } })
 
+// NEXT_PUBLIC_ values are inlined at build time, so the gate must pin the CMS off
+// for its own build. Otherwise a developer's .env decides whether AT15 can pass.
 const build = run('npx', ['next', 'build'], {
   ARTICLES_DIR: 'tests/fixtures/articles',
   ZIPS_FILE: 'tests/fixtures/zips.json',
   NODE_ENV: 'production',
+  NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO: '',
 })
 if (build.status !== 0) {
   console.error(build.stdout + build.stderr)
