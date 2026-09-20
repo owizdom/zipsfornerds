@@ -1,19 +1,20 @@
 ---
-title: "ZIP 318: Orchard to Ironwood Migration"
+title: 'ZIP 318: Orchard to Ironwood Migration'
 series_number: 1
-subtitle: "How a Zcash wallet walks your money through a turnstile everyone can see, without showing anyone it was yours."
+subtitle: >-
+  How a Zcash wallet walks your money through a turnstile everyone can see,
+  without showing anyone it was yours.
 zip: 318
 zip_status: Draft
 zip_category: Wallet
 spec_url: https://zips.z.cash/zip-0318
-date: 2026-09-20
-status: draft
-cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 tag: NU6.3
-disclosure: "[YOUR CALL, MUST BE TRUE ON THE DAY YOU PUBLISH]"
+date: 2026-09-20
+status: published
+disclosure: '[YOUR CALL, MUST BE TRUE ON THE DAY YOU PUBLISH]'
 corrections: []
+cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 ---
-
 ## Welcome to ZIPs For Nerds
 
 Public announcement: this is officially the first post in ZIPs For Nerds, a series that takes one Zcash Improvement Proposal (ZIP) at a time and explains it for people who want more than a headline and less than the formal specification.
@@ -43,7 +44,7 @@ On 29 May 2026 Taylor Hornby, who had been asked to run an AI-assisted security 
 The response came in two steps, and the order mattered:
 
 1. **Switch Orchard off.** An emergency soft fork, effective from Mainnet block 3,363,426, banned Orchard actions from transactions altogether. (A first attempt 60 blocks earlier failed because some mining pools had not upgraded in time, which tells you how fast this was moving.)
-2. **Switch it back on, fixed.** The NU6.2 upgrade re-enabled Orchard with a corrected circuit. The ZIP index records NU6.2 activating at block 3,364,600 on 3 June 2026.
+1. **Switch it back on, fixed.** The NU6.2 upgrade re-enabled Orchard with a corrected circuit. The ZIP index records NU6.2 activating at block 3,364,600 on 3 June 2026.
 
 Why not ship the fix and the shutdown together? ZIP 257 gives two reasons: doing so risked revealing the vulnerability before it had been mitigated, and disabling first closed the window "more quickly, while the fix was still being prepared and reviewed."
 
@@ -99,7 +100,7 @@ ZIP 318 is a Wallet ZIP. It says what a wallet SHOULD and MUST do to be consider
 The procedure has two phases:
 
 1. **Note preparation.** The wallet decides which standard amounts it will migrate and rearranges the user's Orchard notes, privately, so that one note of exactly the right size exists for each planned transfer.
-2. **Scheduled migration transactions.** The wallet signs every migration transaction in advance, then broadcasts them one at a time, at randomly drawn block heights, from background tasks.
+1. **Scheduled migration transactions.** The wallet signs every migration transaction in advance, then broadcasts them one at a time, at randomly drawn block heights, from background tasks.
 
 ![The two phases of a ZIP 318 migration: private note preparation, then scheduled public transfers](/figures/zip-318-orchard-to-ironwood-migration/fig-4-two-phases.svg "Figure 4. Phase 1 happens entirely inside Orchard and reveals no amounts. Phase 2 is where amounts become public, so that is where all the care goes.")
 
