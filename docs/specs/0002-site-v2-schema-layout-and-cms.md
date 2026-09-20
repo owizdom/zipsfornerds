@@ -45,7 +45,7 @@ zips/zips.json         now { "entries": [...] } so it can be a Keystatic singlet
 Article gains: cover (string path), tag (string, e.g. "NU6.3")
 getZips() reads zips.json .entries
 lib/content.ts throws in a production build if a published article has lint violations
-keystatic.config.ts storage: github when KEYSTATIC_GITHUB_REPO is set, else local
+keystatic.config.ts storage: github when NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO is set, else local
 ```
 
 ## 5. Acceptance tests (automated unless marked L)

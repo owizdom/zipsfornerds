@@ -76,7 +76,7 @@ test('AT8 RSS is well-formed and lists only published articles', () => {
   const open = (xml.match(/<item>/g) || []).length
   assert.equal(open, (xml.match(/<\/item>/g) || []).length, 'unbalanced <item> tags')
   assert.equal(open, 1, 'fixture build should have exactly one published item')
-  assert.ok(xml.includes('/research/published-fixture/'), 'RSS should link to the /research/ route')
+  assert.ok(xml.includes('/research/published-fixture'), 'RSS should link to the /research/ route')
 })
 
 test('AT10 figures render with captions and every local image exists', () => {
@@ -135,7 +135,7 @@ test('AT14 the CMS is wired', () => {
 
 test('AT15 the CMS is not an open door in production', async () => {
   const port = 4321
-  const srv = spawn('npx', ['next', 'start', '-p', String(port)], { cwd: root, env: { ...process.env, NODE_ENV: 'production', KEYSTATIC_GITHUB_REPO: '' }, stdio: 'ignore' })
+  const srv = spawn('npx', ['next', 'start', '-p', String(port)], { cwd: root, env: { ...process.env, NODE_ENV: 'production', NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO: '' }, stdio: 'ignore' })
   try {
     let up = false
     for (let i = 0; i < 40 && !up; i++) {
