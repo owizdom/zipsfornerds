@@ -27,7 +27,7 @@ Zcash lets you attach a private note to a shielded payment. The way that works t
 - The same two-output transaction drops from 1024 bytes to about **576 bytes**.
 - Memos can also get bigger: up to **64 chunks** of 256 bytes, so **16 KiB** in one transaction, paying a proportionate fee.
 - Two things become possible that were not before: one memo readable by several recipients, and memo data that can be **pruned** from storage without stopping a node from validating the chain.
-- It is an NU7 candidate, still a Draft, owned by Jack Grigg.
+- It is an NU7 candidate, still a Draft, owned by Jack Grigg, Kris Nuttycombe, Daira-Emma Hopwood and Arya Solhi.
 
 ## Setting the stage: the memo field nobody uses
 
@@ -37,7 +37,7 @@ The implementation, in transaction versions v2 through v5, is simple: each Sapli
 
 Now add the privacy design on top. To stop observers distinguishing a payment with change from one without, wallets pad transactions to two outputs, or two Orchard actions. Both outputs carry their 512 bytes.
 
-The result, in the ZIP's words: such a transaction "will consume 1024 bytes of block space for memo data," and "virtually all transactions with shielded components consume at least 1024 bytes of block space for memo data."
+The result, in the ZIP's words: such a transaction "will consume 1024 bytes of block space for memo data", and "virtually all transactions with shielded components consume at least 1024 bytes of block space for memo data, and between half and 3/4 of that data payload is ordinarily waste."
 
 It gets worse with more inputs. An Orchard transfer spending several notes incurs a memo cost of 512 bytes times the number of input notes, and as the ZIP notes, "ordinarily, most of this data space is wasted, as most wallets support only a single 512-byte memo to be sent to the recipient of the transfer."
 
@@ -49,17 +49,17 @@ So the common case is: pay for two or more memo slots, use at most one, and ever
 
 Three separate limitations follow from putting the memo inside the output, and ZIP 231 addresses all three with one change.
 
-**It is fixed size, so it is both too big and too small.** 512 bytes is far more than an empty memo needs and far less than a long one. There is no way to pay for more, so anything longer has to be split across transactions or moved off-chain.
+**It is fixed size, so it is both too big and too small.** 512 bytes is far more than an empty memo needs and far less than a long one. There is no way to pay for more, so the ZIP notes that "sending memo data greater than 512 bytes requires sending multiple outputs."
 
 **It cannot be shared.** The memo lives inside an output, encrypted to that output's recipient. If you pay three people and want all three to read the same note, you store it three times.
 
 **It can never be deleted.** Because the memo ciphertext is part of the output, it is part of what a node needs to validate the transaction. Every node keeps every memo forever, including the padding in the empty ones.
 
-That last point is the structural one. The ZIP's motivation frames the goal as reducing "the long-term storage costs that memo data imposes on node operators."
+That last point is the structural one. The Motivation puts it as defining "a mechanism by which validating nodes may reduce their long-term storage requirements by pruning memo data."
 
 ## An overview of ZIP 231
 
-ZIP 231 is a Consensus / Wallet ZIP with status Draft, owned by **Jack Grigg**. It is an NU7 candidate and applies to the V7 transaction format.
+ZIP 231 is a Consensus / Wallet ZIP with status Draft, owned by **Jack Grigg, Kris Nuttycombe, Daira-Emma Hopwood and Arya Solhi**, crediting Sean Bowe and Nate Wilcox. It is an NU7 candidate and applies to the V7 transaction format.
 
 The change, in one sentence from the Abstract: it decouples memo data from outputs "by introducing a per-transaction memo bundle. Each shielded output carries a 32-byte memo key rather than an inline 512-byte memo field."
 
@@ -82,19 +82,19 @@ A memo bundle is a sequence of **272-byte memo chunks**, each encrypting **256 b
 
 Each V7 transaction may contain a single memo bundle, and a bundle may contain at most `memo_chunk_limit` = **64** chunks. That caps memo data in one transaction at 64 × 256 = **16384 bytes**, or 16 KiB.
 
-The 272 against 256 difference is the per-chunk overhead of encrypting each chunk individually, which is what makes selective access possible.
+The 16-byte difference between 272 and 256 is the ChaCha20Poly1305 authentication tag on each chunk, which the ZIP records as a 6.25% per-chunk overhead. It is what lets a recipient tell which chunks are theirs.
 
-### Why the number is 576
+### Padding, and where 576 comes from
 
-A two-output transaction today spends 1024 bytes on memos. Under ZIP 231, each output carries a 32-byte key, so 64 bytes, and a single 256-byte memo occupies one 272-byte chunk. That is 336 bytes of structure, and the ZIP gives the resulting figure as approximately 576 bytes once the rest of the encoding is accounted for.
+A bundle cannot carry just one chunk. To stop the number of chunks becoming a fingerprint, the ZIP requires that a V7 transaction with any shielded outputs "include at least 2 memo chunks in its memo bundle and pad the memo to a multiple of 2 chunks". Padding chunks are made by encrypting random data under a random key, so they are "indistinguishable from real encrypted memo chunks to an observer who does not hold the memo key".
 
-Either way the shape of the win is clear: you stop paying twice for space you used once.
+The ZIP states the resulting figure as approximately 576 bytes and does not show its working, so I will not invent a derivation for it. The shape of the win is what matters: two 32-byte keys plus a minimum two-chunk bundle, against 1024 bytes of inline fields, and you stop paying twice for space you used once.
 
 ### Fees scale with memo size
 
 Memo capacity is no longer free-but-fixed; it is paid for. The conventional fee is altered so that a memo bundle may contain **two free chunks** if the transaction has any shielded outputs, and any chunk beyond that requires a marginal fee.
 
-That is a sensible default. Two free chunks is 512 bytes of memo, which covers ordinary use at no extra cost, while a 16 KiB memo pays for the block space it occupies.
+That is a sensible default. Two free chunks is 512 bytes of memo, which covers ordinary use at no extra cost, while a 16 KiB memo pays for the block space it occupies. Note that the fee rule and the padding rule are different things: padding to an even number of chunks is a consensus MUST in ZIP 231, whereas the conventional fee is a ZIP 317 formula that wallets are not obliged to follow.
 
 ### Pruning
 
@@ -102,7 +102,7 @@ This is the part with the longest-lived consequences.
 
 Memo bundles are encoded "in a prunable manner: the entire memo bundle can be replaced by a single digest."
 
-A node that does not need the memo data can discard it and keep a hash. The transaction still validates, because what consensus commits to is the digest. As the motivation puts it, this preserves "the ability of every node to validate the full transaction chain using the memo bundle digest."
+A node that does not need the memo data can discard it and keep a hash. The transaction still validates, because what consensus commits to is the digest. As the Network protocol section puts it, decoupling memo data this way mitigates "the long-term storage costs that memo data imposes on node operators, while preserving the ability of every node to validate the full transaction chain using the memo bundle digest."
 
 Today, memo data is permanent for everyone. After this, it is permanent only for those who choose to keep it.
 
@@ -110,19 +110,19 @@ Today, memo data is permanent for everyone. After this, it is permanent only for
 
 ### Sharing a memo
 
-Because chunks live in a shared bundle and each output carries its own key, two recipients of the same transaction can be given keys that decrypt the same chunk. One copy of the memo, several readers.
+To share a memo, the same memo key is placed in each recipient's note plaintext, so both unlock the same memo. One copy on chain, several readers. A memo may span many chunks, and chunks belonging to different memos are interleaved, so a recipient trial-decrypts the bundle to find their own.
 
 ## Why ZIP 231? The case for taking memos out of outputs
 
 ### It makes the common case cheaper
 
-Almost every shielded transaction is the two-output kind, and almost all of them waste memo space. Cutting roughly 450 bytes from the typical transaction is a saving that compounds across every transaction the chain will ever carry.
+The ZIP's own figures make the case: "virtually all transactions with shielded components consume at least 1024 bytes of block space for memo data, and between half and 3/4 of that data payload is ordinarily waste." Cutting roughly 450 bytes from the typical transaction compounds across every transaction the chain will ever carry.
 
-It also interacts well with ZIP 218, which we covered earlier: that proposal caps shielded actions per block partly to bound what light clients must scan. Smaller transactions mean more real payments fit inside any given limit.
+One thing it does not buy is throughput under ZIP 218. Those limits count actions, not bytes, and ZIP 218 records that the action limit is what binds: a full 2 MB block could hold up to 617 Orchard actions today, against a cap of 330 across pools. Saving memo bytes does not help against a limit denominated in actions.
 
 ### It fixes three problems with one mechanism
 
-Bigger memos, shareable memos and prunable memos are three separate feature requests. They all fall out of the same decision to move the memo out of the output and address it by key. That is the sign of a change made at the right layer.
+Bigger memos, shareable memos, prunable memos, a much smaller output ciphertext and the light-client argument in the ZIP's motivation are separate wants. They all fall out of the same decision to move the memo out of the output and address it by key. That is the sign of a change made at the right layer.
 
 ### Pruning is a long-term storage argument
 
@@ -134,13 +134,17 @@ Replacing a fixed allowance with two free chunks plus marginal pricing is straig
 
 ## Are there any drawbacks to implementing ZIP 231?
 
-### A shared bundle is a new thing for an observer to look at
+### It trades one distinguisher for another, and the ZIP says so
 
-Today memo data is uniform: every output has exactly 512 bytes, which reveals nothing. Under ZIP 231, the number of chunks in a bundle is visible, and it is a function of how much memo data the sender wrote.
+This is the part worth reading in the ZIP itself, because it has a Privacy Implications section that sets out the trade directly.
 
-A transaction with one chunk looks different from one with forty. That is new metadata that did not previously exist, and on a chain whose entire purpose is to minimise observable differences between transactions, any new axis of variation deserves scrutiny.
+Today's arrangement is not neutral. Because every shielded output has its own memo field, the ZIP notes that "a chain observer can therefore infer a likely 1:1 correlation between transaction recipients and memo payloads. The maximum number of distinct memos is precisely known."
 
-The two-free-chunks rule helps, since it gives ordinary transactions a common shape to sit in. I have not found an analysis of how much the tail of larger memos stands out, and for this ZIP that seems like the question worth asking hardest.
+ZIP 231 removes that correlation. An observer "now only knows upper bounds on the amount of memo data being conveyed, and the number of possible distinct memos", and cannot "distinguish between many recipients receiving many small memos, and the same set of recipients receiving one large shared memo."
+
+What it introduces instead is a size signal. A wallet attaching an authenticated reply-to address exceeds 512 bytes and so "may be distinguishable from other ordinary wallet behaviour". The ZIP considered forcing every bundle to 16 chunks to hide that, and rejected it as "an unreasonable amount of waste in the case of ordinary transactions."
+
+Its own summary is the fairest statement of the position: the change "eliminates a potential distinguisher along one axis in exchange for a potential distinguisher along another." Whether that is a good trade depends on how common large memos become, which nobody can know yet.
 
 ### Prunable means losable
 
@@ -150,13 +154,13 @@ That is a reasonable trade for node operators and a change in what users can ass
 
 ### 16 KiB is a lot of room in a block
 
-A single transaction can now carry 16 KiB of memo data. It is paid for, and pricing is the usual defence against abuse. But Zcash blocks are 2 MB, and ZIP 218's action limits exist precisely because filling blocks with shielded data is an attack on light clients.
+A single transaction can now carry 16 KiB of memo data. It is paid for, and pricing is the usual defence against abuse. But Zcash blocks are 2 MB, and ZIP 218 introduces action limits partly to bound the block processing rate and partly to cap what light clients must scan.
 
-Memo chunks are not actions, so they are not covered by those limits. I would want to see the two mechanisms considered together before both ship, since they are both NU7 candidates and both are about bounding what an adversary can put in a block.
+Memo chunks are not actions, so they are not covered by those limits. The ZIPs do answer this: ZIP 231 argues that capping a bundle at 16 KiB "limits the rate at which the chain size can grow cheaply", and ZIP 317 states that the fee for extra memo chunks "scales at the same rate as adding logical actions, so it isn't a cheaper mechanism for an adversary to bloat chain size". For scale, 16 KiB is under 1% of a 2 MB block. I still think the two limits deserve to be reasoned about together, since both are NU7 candidates, but the pricing answer exists.
 
 ### More complexity in every wallet
 
-An inline memo field is trivial to implement. A key derivation, a shared bundle, individually encrypted chunks, selective decryption and a pruning path are not. Every wallet has to implement this correctly, and wallets have historically been where privacy bugs live rather than in consensus code.
+An inline memo field is trivial to implement. A key derivation, a shared bundle, individually encrypted chunks, selective decryption and a pruning path are not. Every wallet has to implement this correctly, including the padding rule, the trial decryption and the pruning path.
 
 ## Where this stands
 
@@ -183,3 +187,4 @@ Next in the series: ZIP 2002, a small proposal that makes the transaction fee so
 - ZIP 218: 25-second Block Target Spacing, for the action limits. https://zips.z.cash/zip-0218
 - ZIP 317: Proportional Transfer Fee Mechanism. https://zips.z.cash/zip-0317
 - ZIP index, for statuses and the NU7 candidate list. https://zips.z.cash/
+- CoinDesk, "Zcash holders overwhelmingly back faster transactions and bitcoin-style halvings," 16 September 2026, for the NU7 readiness deadline. https://www.coindesk.com/tech/2026/09/16/zcash-holders-overwhelmingly-back-faster-transactions-and-bitcoin-style-halvings

@@ -24,8 +24,8 @@ This is the ZIP behind the headline everyone saw in September: Zcash blocks are 
 - Today a Zcash block arrives every 75 seconds on average. ZIP 218 cuts that to 25 seconds in NU7.
 - That is a straight 3x cut in how long you wait for a first confirmation. The ZIP's framing: "The user-latency goes down 3x."
 - It was put to coinholders in the NU7 vote that closed on 14 September 2026, and 99.9% of participating ZEC backed it.
-- The part that got almost no coverage is the second half of the proposal: **action limits**, a new cap on how much shielded work fits in a block. Without them, faster blocks would have made a denial-of-service attack on light wallets three times cheaper.
-- With the limits, Orchard throughput goes from 2.9 to 6.6 transactions per second, and the worst-case sync burden on a light client drops 37%, from 271 to 169 MB a day.
+- The part that got almost no coverage is the second half of the proposal: **action limits**, a new cap on how much shielded work fits in a block. Without them, faster blocks would have tripled the ceiling on how much scanning work an attacker can force onto every light wallet.
+- With the limits, Orchard throughput for standard two-action transactions goes from 2.9 to 6.6 per second, and the worst-case sync burden on a light client drops from 271 to 169 MB a day.
 - The total ZEC issued per day does not change. The per-block reward is divided so the daily rate stays the same.
 
 ## Setting the stage: what 75 seconds costs you
@@ -58,13 +58,13 @@ Now triple the number of blocks per day at the same 2 MB block size limit, and y
 
 ZIP 218's answer is **action limits**: caps on how many shielded actions may go into a block, with a global limit across all pools and separate per-pool limits.
 
-The result, in the ZIP's own numbers, is that the configuration "more than double[s] the Orchard TPS (2.9 → 6.6 TPS), while lowering the impact a DoS attacker can impose on wallets; for example, maximum shielded sync bandwidth for light clients is reduced by 37% (271 → 169 MB/day)."
+The result, in the ZIP's own numbers, is that the configuration "more than double[s] the Orchard TPS (2.9 → 6.6 TPS), while lowering the impact a DoS attacker can impose on wallets; for example, maximum shielded sync bandwidth for light clients is reduced by 37% (271 → 169 MB/day)." Both throughput figures are for standard two-action Orchard transactions.
 
 Read that carefully, because it is doing something slightly surprising. Throughput more than doubles **and** the worst case gets better. Those usually trade against each other. They do not here because the two numbers describe different things: ordinary capacity for real transactions versus the ceiling an attacker can push against. The limits raise the first and lower the second.
 
 ![Action limits raise ordinary throughput while lowering the worst-case sync burden](/figures/zip-218-25-second-block-target-spacing/fig-2-action-limits.svg "Figure 2. Orchard throughput up from 2.9 to 6.6 transactions per second; worst-case light client sync down from 271 to 169 MB a day. Figures from ZIP 218.")
 
-The limits fall hardest on the old pools. The ZIP says they "significantly decrease the number of Sprout and Sapling pool outputs available per block, to lower the maximum shielded sync burden under attempted DoS." Sprout and Sapling outputs are the most expensive for a light client to scan and the least used in practice, so they are where the savings are cheapest to take.
+The limits fall hardest on the old pools. The ZIP says they "significantly decrease the number of Sprout and Sapling pool outputs available per block, to lower the maximum shielded sync burden under attempted DoS." The ZIP's stated justification is usage rather than cost: "The reduced Sapling and Sprout per-block limits are justified by the current distribution of shielded funds across pools." Orchard holds the overwhelming majority, so cutting the old pools' limits buys worst-case headroom while affecting the fewest people. Per unit they are actually cheaper to scan than Orchard; it is that so many more of them fit in a block that makes them dominate the worst case.
 
 ## An overview of ZIP 218
 
@@ -73,22 +73,22 @@ ZIP 218 is a Consensus ZIP with status Draft, owned by **Dev Ojha and Evan Forbe
 It does three things:
 
 1. **Changes the block target spacing** from 75 seconds to 25.
-2. **Introduces per-pool action limits** for the Sapling and Orchard shielded protocols, plus a global limit.
-3. **Rescales the block subsidy** so that daily ZEC issuance is unchanged.
+2. **Introduces action limits**: a global shielded budget of 330, an Orchard limit of 330, a Sapling input/output limit of 300 and a Sprout JoinSplit limit of 25, with Sprout JoinSplits weighted double inside the global budget.
+3. **Rescales the block subsidy and the halving interval** so that daily ZEC issuance, and the wall-clock gap between halvings, are unchanged. The schedule itself is rewritten: the ZIP defines `PostNU7HalvingInterval` = 5,040,000 blocks and adds a new case to the halving function.
 
 Point three is the one that stops the obvious objection. Three times as many blocks paying the same reward each would mean three times the inflation. The ZIP is direct: "The emission schedule of mined ZEC will be the same in terms of ZEC/day, but this requires the emission per block to be adjusted to take account of the changed block target spacing."
 
-Miners are not being paid more or less. The same daily issuance is cut into three times as many pieces.
+Miners are not being paid more or less. The same daily issuance is cut into three times as many pieces, and the halving interval is tripled in blocks so that halvings still land four years apart in wall-clock time.
 
-![The same daily ZEC issuance divided into three times as many blocks](/figures/zip-218-25-second-block-target-spacing/fig-3-issuance.svg "Figure 3. Same ZEC per day, smaller reward per block. The halving schedule is untouched by this ZIP.")
+![The same daily ZEC issuance divided into three times as many blocks](/figures/zip-218-25-second-block-target-spacing/fig-3-issuance.svg "Figure 3. Same ZEC per day, smaller reward per block. Halvings still land four years apart in wall-clock time, though the interval in blocks is tripled to 5,040,000.")
 
 ## How it works
 
 ### The spacing change, and everything measured in blocks
 
-The target spacing becomes 25 seconds. Difficulty adjustment continues to steer towards that target.
+The target spacing becomes 25 seconds. Two related constants move with it: the difficulty averaging window goes from 17 to 102, and the maximum supported reorganisation length goes from 99 to 600 blocks, scaled by six rather than three so the wall-clock window stays about 4.2 hours. The ZIP accepts a consequence of that explicitly, noting that "a supported reorg may invalidate a mature coinbase output."
 
-The consequence that ripples furthest is that many protocol constants are measured in blocks, not time. A constant meaning "about an hour" as a block count now means about twenty minutes. The ZIP handles this by rescaling the constants that represent durations, marking them to "Scale by 3."
+The consequence that ripples furthest is that many protocol constants are measured in blocks, not time. A constant meaning "about an hour" as a block count now means about twenty minutes. The ZIP handles the ones it owns with a table, but not uniformly: most duration constants are marked "Scale by 3", the reorg length is "Scale by 6", and several are left alone. It is also advice rather than consensus, phrased as implementations "SHOULD scale by NU7PoWTargetSpacingRatio those constants that represent a time duration" and "SHOULD NOT scale those whose semantics are intrinsically measured in blocks."
 
 This is exactly the kind of change that is easy to get right for node software and easy to miss elsewhere. I wrote about one case last time: ZIP 318's migration timings are all expressed in blocks, and I could find no mention of ZIP 318 or wallet migration constants anywhere in ZIP 218. If both ship, a wallet's migration schedule compresses threefold unless someone rescales it deliberately.
 
@@ -96,11 +96,13 @@ This is exactly the kind of change that is easy to get right for node software a
 
 If blocks arrive three times faster, is one confirmation worth a third as much?
 
-The ZIP's answer depends on the threat model, and it says so: "Rollback-risk analysis depends on the threat model. For models that bound an attacker by a fixed fraction of total hash power, reducing the block target spacing can reduce confirmation latency by nearly the same factor."
+The ZIP's answer depends on the threat model, and it says so: "Rollback-risk analysis depends on the threat model. For models that bound an attacker by a fixed fraction of total hash power, reducing the block target spacing can reduce confirmation latency by nearly the same factor, provided that block validation and propagation remain small relative to the target spacing." It then states its conclusion: the proposal "is expected to improve confirmation latency by slightly less than 3x for users applying the same rollback-risk tolerance as today."
+
+That proviso about validation and propagation is not a throwaway. It is the condition the stale-rate experiment exists to establish.
 
 The argument is that if you model an attacker as controlling some percentage of hash power, then the security of a confirmation comes from the *proportion* of work done, not the wall-clock time it took. Three faster blocks represent a similar share of total work as one slow block did.
 
-That holds for a proportional-hash-power model. It holds less well for models where the attacker's advantage is tied to wall-clock time, such as network latency or an attacker who can rent hash power for a fixed period. The ZIP acknowledges the dependence rather than claiming the question is settled, which is the right posture.
+That holds for a proportional-hash-power model. The ZIP supplies its own counter-case rather than leaving it to the reader: under economic rollback models, shorter block times "significantly reduce the variance of their waiting time, while the mean stays roughly the same." So the gain is real but differently shaped depending on what you think an attacker is.
 
 ### It does not compete with finality
 
@@ -128,7 +130,7 @@ Including the mitigation in the same proposal is what makes the throughput and s
 
 ### The numbers are specific and checkable
 
-2.9 to 6.6 transactions per second. 271 to 169 MB a day, a 37% reduction. A reader can check the arithmetic and an implementer can test against it. Proposals that offer round, unfalsifiable claims are harder to evaluate and easier to get wrong.
+2.9 to 6.6 transactions per second for two-action transactions. 271 to 169 MB a day. An implementer can test against these rather than against a vibe, and the stale-rate section goes further by reporting a measurement from a 99-node experiment. Proposals that offer round, unfalsifiable claims are harder to evaluate and easier to get wrong. (One pedantic note: 169/271 is a 37.6% reduction, so the ZIP's "37%" is rounded down.)
 
 ## Are there any drawbacks to implementing ZIP 218?
 
@@ -142,17 +144,21 @@ This is my own concern rather than something the ZIP raises, and I would like to
 
 ### Three times the block headers, forever
 
-Every node stores and validates three times as many block headers per day, forever. Header growth is small compared with block data, but it is permanent and it compounds. For a chain that intends to run for decades, tripling a linear cost deserves more discussion than I could find in the proposal.
+Headers go from 1,152 to 3,456 a day. The ZIP does cost this on the wallet side, noting a 90-byte compact block header leads to "an extra 200kb of wallet bandwidth per day in exchange for the improved UX", and its table shows 0.10 MB to 0.31 MB a day.
 
-### More orphaned blocks
+What I could not find is the node-side storage figure. Header growth is small next to block data, but it is permanent and it compounds, and for a chain meant to run for decades that seems worth a line.
 
-Shorter spacing means a higher proportion of blocks are found while another is still propagating. Those blocks are wasted work. This is a well-understood cost of faster block times and it tends to fall harder on smaller miners with worse connectivity, which pushes gently towards centralisation.
+### More orphaned blocks, and the ZIP has measured them
 
-The ZIP's rollback discussion touches the security side of reorganisations. I did not find a treatment of the orphan rate or its distributional effect on miners, and for a change of this size I would expect one.
+Shorter spacing means a higher proportion of blocks are found while another is still propagating. Those blocks are wasted work, and the cost falls hardest on miners with worse connectivity, which pushes gently towards centralisation.
+
+The ZIP has a section on this and it is one of the more convincing parts of the document. Today the stale rate is 0.4%. At 25 seconds the theoretical rate is "approximately 3.26%, derived from measured Zcash network propagation delays". They also ran it: "A devnet experiment with 99 geographically-distributed Zebra nodes producing 2MB blocks at 25-second target spacing measured a stale block rate of 4.86% and a fork rate of 0.37%. Both observed figures are below the 5.4% safety threshold set by Ethereum's historical proof-of-work stale rate."
+
+So the orphan rate roughly tens-fold increases, from 0.4% to somewhere near 3% to 5%, and the ZIP's argument is that this remains inside a threshold the industry has already lived with. That is a real answer backed by an experiment. Whether a smaller miner finds 4.86% acceptable is a different question, and the distributional effect is the part I would still want discussed.
 
 ### The old pools take the squeeze
 
-The action limits work partly by cutting how many Sprout and Sapling outputs fit in a block. That is defensible: those pools are deprecated and expensive to scan. But it does mean holders still using them get a degraded service as a side effect of a change sold on latency.
+The action limits work partly by cutting how many Sprout and Sapling outputs fit in a block. That is defensible: those pools hold a small fraction of shielded funds. But it does mean holders still using them get a degraded service as a side effect of a change sold on latency.
 
 Given the direction of travel, with Orchard sealed and Ironwood the destination, this looks intentional rather than accidental. It is still worth naming, because "your transactions became harder to fit into a block" is not something anyone was told they were voting on.
 

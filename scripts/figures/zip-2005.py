@@ -51,7 +51,7 @@ b += label(710, 196, 'Notes built the new way.', 'sm') + label(710, 222, 'A futu
 b += arrow(445, 210, 512, 210, gold=True) + label(480, 196, 'move', 'm')
 b += label(480, 378, 'The ZIP: funds left behind would be "inaccessible after their respective protocols are disabled".', 'sm')
 write(SLUG, 'fig-4-recoverable-or-not.svg', svg(960, 402, b, 'Funds move from older pools into Ironwood, where they could be recovered',
-    'Funds in Sprout, Sapling, Orchard or transparent addresses would be inaccessible once those protocols are disabled. Moving them into the Ironwood pool makes them recoverable by a future protocol.'))
+    'Funds left in the Sprout, Sapling or Orchard pools would be inaccessible once those protocols are disabled. Transparent balances have no protocol to disable, but the ZIP still tells wallets to move them. Funds in the Ironwood pool could be recovered by a future protocol.'))
 
 # COVER
 c = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="A lattice of gold note commitments, most intact, some broken apart">
