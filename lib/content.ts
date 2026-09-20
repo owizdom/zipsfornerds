@@ -8,6 +8,7 @@ import remarkRehype from 'remark-rehype'
 import rehypeSlug from 'rehype-slug'
 import rehypeStringify from 'rehype-stringify'
 import { lintPublished } from './lint'
+import { rehypeFigures, rehypeSafeUrls } from './markdown'
 
 export type Article = {
   slug: string
@@ -31,7 +32,9 @@ export type Article = {
 }
 
 const articlesDir = () => path.resolve(process.cwd(), process.env.ARTICLES_DIR || 'articles')
-export const showDrafts = () => process.env.SHOW_DRAFTS === '1'
+// Drafts are a development convenience only. A production build ignores the flag
+// outright, so a stray SHOW_DRAFTS=1 in a deployment cannot publish unreviewed work.
+export const showDrafts = () => process.env.NODE_ENV !== 'production' && process.env.SHOW_DRAFTS === '1'
 
 const toIsoDate = (d: unknown) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10))
 
@@ -41,16 +44,13 @@ function render(markdown: string): string {
       .use(remarkParse)
       .use(remarkGfm)
       .use(remarkRehype)
+      .use(rehypeFigures)
+      .use(rehypeSafeUrls)
       .use(rehypeSlug)
       .use(rehypeStringify)
       .processSync(markdown),
   )
 }
-
-// A paragraph holding only an image with a title becomes a captioned figure.
-const figures = (html: string) =>
-  html.replace(/<p><img src="([^"]+)" alt="([^"]*)" title="([^"]*)"><\/p>/g, (_m, src, alt, title) =>
-    `<figure><img src="${src}" alt="${alt}" loading="lazy" decoding="async"><figcaption>${title}</figcaption></figure>`)
 
 function load(file: string): Article {
   const raw = fs.readFileSync(path.join(articlesDir(), file), 'utf8')
@@ -61,7 +61,7 @@ function load(file: string): Article {
     const violations = lintPublished(raw)
     if (violations.length) throw new Error(`Publish gate: ${file} is published but fails lint:\n  ${violations.slice(0, 8).join('\n  ')}`)
   }
-  const html = figures(render(content))
+  const html = render(content)
   const outline = [...html.matchAll(/<h2 id="([^"]+)">(.*?)<\/h2>/g)]
     .map((m) => ({ id: m[1], text: m[2].replace(/<[^>]+>/g, '') }))
     .filter((h) => h.text !== 'Sources')
