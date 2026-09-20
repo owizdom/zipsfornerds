@@ -1,4 +1,19 @@
-[
-  { "zip": 9999, "title": "A Fixture Proposal", "status": "Proposed", "upgrade": "NU-Test", "specUrl": "https://zips.z.cash/zip-9999", "articleSlug": "published-fixture" },
-  { "zip": 8888, "title": "A Draft That Must Never Ship", "status": "Draft", "upgrade": "NU-Test", "specUrl": "https://zips.z.cash/zip-8888" }
-]
+{
+  "entries": [
+    {
+      "zip": 9999,
+      "title": "A Fixture Proposal",
+      "status": "Proposed",
+      "upgrade": "NU-Test",
+      "specUrl": "https://zips.z.cash/zip-9999",
+      "articleSlug": "published-fixture"
+    },
+    {
+      "zip": 8888,
+      "title": "A Draft That Must Never Ship",
+      "status": "Draft",
+      "upgrade": "NU-Test",
+      "specUrl": "https://zips.z.cash/zip-8888"
+    }
+  ]
+}

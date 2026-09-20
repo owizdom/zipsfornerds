@@ -35,7 +35,7 @@ test('AT6 lint catches violations', () => {
 })
 
 test('AT7 ZIP index is consistent', () => {
-  const zips = JSON.parse(fs.readFileSync(path.join(root, 'zips/zips.json'), 'utf8'))
+  const zips = JSON.parse(fs.readFileSync(path.join(root, 'zips/zips.json'), 'utf8')).entries
   assert.ok(zips.length >= 11, 'expected the scheduled coverage list')
   const published = new Set(articles.filter((a) => a.fm.status === 'published').map((a) => a.slug))
   for (const z of zips) {

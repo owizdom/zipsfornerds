@@ -1,79 +1,81 @@
-[
-  {
-    "zip": 318,
-    "title": "Orchard to Ironwood Migration",
-    "status": "Draft",
-    "upgrade": "NU6.3",
-    "specUrl": "https://zips.z.cash/zip-0318"
-  },
-  {
-    "zip": 2005,
-    "title": "Ironwood Quantum Recoverability",
-    "status": "Proposed",
-    "upgrade": "NU6.3",
-    "specUrl": "https://zips.z.cash/zip-2005"
-  },
-  {
-    "zip": 258,
-    "title": "Deployment of the NU6.3 Network Upgrade",
-    "status": "Draft",
-    "upgrade": "NU6.3",
-    "specUrl": "https://zips.z.cash/zip-0258"
-  },
-  {
-    "zip": 326,
-    "title": "NU6.3 Consequences for Wallets",
-    "status": "Draft",
-    "upgrade": "NU6.3",
-    "specUrl": "https://zips.z.cash/zip-0326"
-  },
-  {
-    "zip": 218,
-    "title": "25-second Block Target Spacing",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-0218"
-  },
-  {
-    "zip": 233,
-    "title": "Network Sustainability Mechanism: Removing Funds From Circulation",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-0233"
-  },
-  {
-    "zip": 234,
-    "title": "Network Sustainability Mechanism: Issuance Smoothing",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-0234"
-  },
-  {
-    "zip": 235,
-    "title": "Remove 60% of Transaction Fees From Circulation",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-0235"
-  },
-  {
-    "zip": 231,
-    "title": "Memo Bundles",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-0231"
-  },
-  {
-    "zip": 2002,
-    "title": "Explicit Fees",
-    "status": "Draft",
-    "upgrade": "NU7 candidate",
-    "specUrl": "https://zips.z.cash/zip-2002"
-  },
-  {
-    "zip": 229,
-    "title": "Version 6 Transaction Format",
-    "status": "Draft",
-    "upgrade": "NU6.3",
-    "specUrl": "https://zips.z.cash/zip-0229"
-  }
-]
+{
+  "entries": [
+    {
+      "zip": 318,
+      "title": "Orchard to Ironwood Migration",
+      "status": "Draft",
+      "upgrade": "NU6.3",
+      "specUrl": "https://zips.z.cash/zip-0318"
+    },
+    {
+      "zip": 2005,
+      "title": "Ironwood Quantum Recoverability",
+      "status": "Proposed",
+      "upgrade": "NU6.3",
+      "specUrl": "https://zips.z.cash/zip-2005"
+    },
+    {
+      "zip": 258,
+      "title": "Deployment of the NU6.3 Network Upgrade",
+      "status": "Draft",
+      "upgrade": "NU6.3",
+      "specUrl": "https://zips.z.cash/zip-0258"
+    },
+    {
+      "zip": 326,
+      "title": "NU6.3 Consequences for Wallets",
+      "status": "Draft",
+      "upgrade": "NU6.3",
+      "specUrl": "https://zips.z.cash/zip-0326"
+    },
+    {
+      "zip": 218,
+      "title": "25-second Block Target Spacing",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-0218"
+    },
+    {
+      "zip": 233,
+      "title": "Network Sustainability Mechanism: Removing Funds From Circulation",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-0233"
+    },
+    {
+      "zip": 234,
+      "title": "Network Sustainability Mechanism: Issuance Smoothing",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-0234"
+    },
+    {
+      "zip": 235,
+      "title": "Remove 60% of Transaction Fees From Circulation",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-0235"
+    },
+    {
+      "zip": 231,
+      "title": "Memo Bundles",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-0231"
+    },
+    {
+      "zip": 2002,
+      "title": "Explicit Fees",
+      "status": "Draft",
+      "upgrade": "NU7 candidate",
+      "specUrl": "https://zips.z.cash/zip-2002"
+    },
+    {
+      "zip": 229,
+      "title": "Version 6 Transaction Format",
+      "status": "Draft",
+      "upgrade": "NU6.3",
+      "specUrl": "https://zips.z.cash/zip-0229"
+    }
+  ]
+}
