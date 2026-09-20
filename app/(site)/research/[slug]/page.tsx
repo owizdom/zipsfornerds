@@ -53,7 +53,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div><dt>Spec</dt><dd><a href={a.specUrl}>{a.specUrl.replace('https://', '')}</a></dd></div>
         </dl>
         <aside className="accountability" aria-label="Review, corrections and disclosure">
-          <p><span className="label">Reviewed by</span>{a.reviewedBy}</p>
           <div>
             <span className="label">Corrections</span>
             {a.corrections.length ? <ul>{a.corrections.map((c) => <li key={c}>{c}</li>)}</ul> : <span>None yet.</span>}

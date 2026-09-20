@@ -8,3 +8,5 @@ next-env.d.ts
 .env*
 .next-dirty
 .next-ga
+.next-xss
+.next-drafts

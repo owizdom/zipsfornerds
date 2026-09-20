@@ -48,7 +48,7 @@ test('AT2 drafts never ship', () => {
 
 test('AT3 article page carries its accountability block', () => {
   const html = read('research/published-fixture.html')
-  for (const needle of ['ZIP 9999', 'Proposed', 'Reviewed by', 'Fixture Reviewer', 'Corrections', 'fixed a fixture typo', 'Disclosure', 'Fixture disclosure text', 'Sources']) {
+  for (const needle of ['ZIP 9999', 'Proposed', 'Corrections', 'fixed a fixture typo', 'Disclosure', 'Fixture disclosure text', 'Sources']) {
     assert.ok(html.includes(needle), `article page missing "${needle}"`)
   }
 })
@@ -124,7 +124,7 @@ test('AT13 the schema-style structure is present', () => {
 
 test('AT14 the CMS is wired', () => {
   const cfg = fs.readFileSync(path.join(root, 'keystatic.config.ts'), 'utf8')
-  for (const key of ['title', 'series_number', 'subtitle', 'zip', 'zip_status', 'zip_category', 'spec_url', 'date', 'status', 'reviewed_by', 'disclosure', 'corrections', 'cover', 'tag', 'content']) {
+  for (const key of ['title', 'series_number', 'subtitle', 'zip', 'zip_status', 'zip_category', 'spec_url', 'date', 'status', 'disclosure', 'corrections', 'cover', 'tag', 'content']) {
     assert.match(cfg, new RegExp(`\\b${key}\\s*:`), `keystatic.config.ts has no field "${key}"`)
   }
   assert.match(cfg, /path:\s*'articles\/\*'/, 'articles collection must write to articles/')
@@ -174,4 +174,64 @@ test('AT16 the privacy claim always matches reality', () => {
   assert.ok(!on.includes('no cookies · no trackers'), 'the site must not claim "no trackers" while running one')
   assert.ok(on.includes('Google Analytics'), 'footer should name the analytics provider')
   assert.ok(on.includes('G-TESTONLY123'), 'the measurement id should reach the page')
+})
+
+test('AT17 hostile article content cannot inject script or executable URLs', () => {
+  const dist = '.next-xss'
+  const r = spawnSync('npx', ['next', 'build'], {
+    cwd: root, encoding: 'utf8',
+    env: { ...process.env, NODE_ENV: 'production', ARTICLES_DIR: 'tests/fixtures/xss', ZIPS_FILE: 'tests/fixtures/zips.json', NEXT_DIST_DIR: dist },
+  })
+  assert.equal(r.status, 0, `hostile fixture should build:\n${r.stdout}${r.stderr}`)
+  const html = fs.readFileSync(path.join(root, dist, 'server', 'app', 'research', 'evil.html'), 'utf8')
+
+  // No injected markup may reach the page as markup. Each of these is the exact
+  // string the fixture tries to smuggle in through a different vector.
+  for (const literal of [
+    '<script>window.PWNED=1</script>',   // caption breaking out of its attribute
+    '<script>window.RAWPWN=1</script>',  // raw HTML in the body
+    'onerror="window.IMGPWN=1"',         // inline event handler
+  ]) {
+    assert.ok(!html.includes(literal), `injection survived: ${literal}`)
+  }
+  assert.ok(!/href="\s*javascript:/i.test(html), 'a javascript: URL survived')
+  assert.ok(!/href="\s*data:text\/html/i.test(html), 'a data:text/html URL survived')
+
+  // The caption still renders, as inert escaped text.
+  assert.match(html, /<figcaption>Cap&#x3C;\/figcaption>/, 'caption should render as escaped text')
+
+  // Alt text keeps its raw characters, which is safe: inside a quoted attribute
+  // value an HTML parser treats `<` as literal text, so it cannot open a tag.
+  assert.match(html, /alt="a<script>window\.ALTPWN=1<\/script>b"/, 'alt should stay inside its attribute')
+})
+
+test('AT18 a production build ignores SHOW_DRAFTS', () => {
+  const dist = '.next-drafts'
+  const r = spawnSync('npx', ['next', 'build'], {
+    cwd: root, encoding: 'utf8',
+    env: { ...process.env, NODE_ENV: 'production', SHOW_DRAFTS: '1', ARTICLES_DIR: 'tests/fixtures/articles', ZIPS_FILE: 'tests/fixtures/zips.json', NEXT_DIST_DIR: dist },
+  })
+  assert.equal(r.status, 0, `build failed:\n${r.stdout}${r.stderr}`)
+  const dir = path.join(root, dist, 'server', 'app')
+  assert.ok(!fs.existsSync(path.join(dir, 'research', 'draft-fixture.html')), 'SHOW_DRAFTS=1 published a draft route in production')
+
+  // The draft's own words and its link must appear nowhere. (Its title is not a
+  // useful probe: the ZIP index fixture legitimately carries the same string.)
+  for (const f of walk(path.join(root, dist, 'server')).concat(walk(path.join(root, dist, 'static')))
+    .filter((p) => /\.(html|body|rsc|json|js)$/.test(p))) {
+    const text = fs.readFileSync(f, 'utf8')
+    assert.ok(!text.includes('DRAFT-FIXTURE-MARKER'), `draft content leaked into ${path.relative(root, f)}`)
+    assert.ok(!text.includes('/research/draft-fixture'), `draft link leaked into ${path.relative(root, f)}`)
+  }
+  const rss = fs.readFileSync(path.join(dir, 'rss.xml.body'), 'utf8')
+  assert.equal((rss.match(/<item>/g) || []).length, 1, 'RSS should still carry only the published fixture')
+})
+
+test('AT19 the site makes no owner-review promise', () => {
+  const banned = [/reviewed by/i, /owner_review/i, /owners before it is published/i, /owners see it first/i, /wrote the ZIP/i]
+  const sources = ['app', 'components', 'lib'].flatMap((d) => walk(path.join(root, d))).filter((f) => /\.(tsx?|css)$/.test(f))
+  for (const f of pages().concat(sources)) {
+    const text = fs.readFileSync(f, 'utf8')
+    for (const b of banned) assert.ok(!b.test(text), `${path.relative(root, f)} still promises owner review (${b})`)
+  }
 })

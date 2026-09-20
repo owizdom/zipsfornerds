@@ -10,7 +10,6 @@ date: 2026-01-02
 status: published
 cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 tag: NU-Test
-reviewed_by: "Fixture Reviewer, ZIP owner"
 disclosure: "Fixture disclosure text."
 corrections:
   - "2026-01-03: fixed a fixture typo."

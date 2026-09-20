@@ -10,7 +10,6 @@ date: 2026-09-20
 status: draft
 cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
 tag: NU6.3
-reviewed_by: "Not yet reviewed by the ZIP's owners."
 disclosure: "[YOUR CALL, MUST BE TRUE ON THE DAY YOU PUBLISH]"
 corrections: []
 ---
@@ -19,7 +18,7 @@ corrections: []
 
 Public announcement: this is officially the first post in ZIPs For Nerds, a series that takes one Zcash Improvement Proposal (ZIP) at a time and explains it for people who want more than a headline and less than the formal specification.
 
-The rules of the house are simple. Every article describes the problem a ZIP is trying to solve, walks through how the ZIP works, makes the case for it, and then (this part matters) gives the best arguments against it. I send each draft to the ZIP's owners before publishing, and corrections are logged at the top of the page where you can see them.
+The rules of the house are simple. Every article describes the problem a ZIP is trying to solve, walks through how the ZIP works, makes the case for it, and then (this part matters) gives the best arguments against it. Every claim is checked against the ZIP text and the sources listed at the end, and corrections are logged at the top of the page where you can see them.
 
 I am starting with ZIP 318 because it is the ZIP most Zcash holders have already lived through without reading. If you opened a Zcash wallet after 28 July 2026 and found a prompt asking you to migrate your funds, ZIP 318 is the document that was meant to decide what happened next (whether your wallet actually followed it is a question I get to below). You clicked a button. Somebody spent weeks arguing about what that button should do. This article is about the argument.
 
@@ -297,11 +296,11 @@ ZIP 218 rescales node constants that represent durations. I searched its text an
 
 ## Where the migration stands
 
-When I checked CipherScan's Ironwood tracker on 20 September 2026 [REFRESH ON PUBLICATION DAY], it showed 3,223,058 ZEC migrated from Orchard into Ironwood, which it reports as 88.7% of the Orchard supply, carried by 22,882 transactions. 410,124 ZEC was still in Orchard.
+When I checked CipherScan's Ironwood tracker on 20 September 2026, at block 3,489,725, it showed 3,223,060 ZEC migrated from Orchard into Ironwood, which it reports as 88.7% of the Orchard supply, carried by 22,886 transactions. 410,123 ZEC was still in Orchard.
 
 ![Bar showing 88.7 percent of the Orchard supply migrated to Ironwood and 11.3 percent remaining](/figures/zip-318-orchard-to-ironwood-migration/fig-9-migration-progress.svg "Figure 9. Orchard's exit, as of 20 September 2026. Source: CipherScan. Ironwood's own balance, about 3.97 million ZEC, is a different number: roughly 4.55 million ZEC has entered it from all sources (Orchard, the transparent pool, Sapling and coinbase rewards) and roughly 0.58 million has since left.")
 
-The rush is over. Those 22,882 transactions work out to about 420 a day across the 54 days since activation. The tracker counted 199 in the previous 24 hours.
+The rush is over. Those 22,886 transactions work out to about 420 a day across the 54 days since activation. The tracker counted 200 in the previous 24 hours.
 
 That tail matters for anyone who has not migrated yet. The design depends on a crowd, and the crowd is thinning. The ZIP's own analysis notes that in the first days after activation privacy rested "on cohort size" because every migrating wallet shared the same few anchors. Latecomers still draw from the same small window of recent anchors. My reading is that what they lack is company inside each cohort, and that for a late migrator the Shielded Labs advice about network-level privacy carries more weight than it did in July.
 
