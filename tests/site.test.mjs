@@ -135,8 +135,15 @@ test('AT14 the CMS is wired', () => {
 })
 
 test('AT15 the CMS is not an open door in production', async () => {
+  // This build was made with the CMS switched off (see scripts/test.mjs). Because
+  // NEXT_PUBLIC_ values are inlined at build time, that is the state under test:
+  // a deployment built without GitHub credentials must expose nothing.
   const port = 4321
-  const srv = spawn('npx', ['next', 'start', '-p', String(port)], { cwd: root, env: { ...process.env, NODE_ENV: 'production', NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO: '' }, stdio: 'ignore' })
+  const srv = spawn('npx', ['next', 'start', '-p', String(port)], {
+    cwd: root,
+    env: { ...process.env, NODE_ENV: 'production', NEXT_PUBLIC_KEYSTATIC_GITHUB_REPO: '' },
+    stdio: 'ignore',
+  })
   try {
     let up = false
     for (let i = 0; i < 40 && !up; i++) {
@@ -144,12 +151,15 @@ test('AT15 the CMS is not an open door in production', async () => {
       up = await fetch(`http://localhost:${port}/`).then((r) => r.ok).catch(() => false)
     }
     assert.ok(up, 'production server did not start')
-    for (const p of ['/api/keystatic/tree', '/api/keystatic/blob/x/articles/zip-318-orchard-to-ironwood-migration.md']) {
+    for (const p of [
+      '/keystatic',
+      '/keystatic/collection/articles',
+      '/api/keystatic/tree',
+      '/api/keystatic/blob/main/articles/zip-318-orchard-to-ironwood-migration.md',
+    ]) {
       const r = await fetch(`http://localhost:${port}${p}`)
-      assert.equal(r.status, 404, `${p} should be 404 in production without GitHub credentials, got ${r.status}`)
+      assert.equal(r.status, 404, `${p} should be 404 when the CMS is not configured, got ${r.status}`)
     }
-    const admin = await fetch(`http://localhost:${port}/keystatic`)
-    assert.equal(admin.status, 404, `/keystatic should be 404 in production without GitHub credentials, got ${admin.status}`)
   } finally {
     srv.kill('SIGTERM')
   }
