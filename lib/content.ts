@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 import rehypeSlug from 'rehype-slug'
 import rehypeStringify from 'rehype-stringify'
+import { lintPublished } from './lint'
 
 export type Article = {
   slug: string
@@ -19,6 +20,8 @@ export type Article = {
   specUrl: string
   date: string
   status: 'draft' | 'published'
+  cover: string
+  tag: string
   reviewedBy: string
   disclosure: string
   corrections: string[]
@@ -52,6 +55,12 @@ const figures = (html: string) =>
 function load(file: string): Article {
   const raw = fs.readFileSync(path.join(articlesDir(), file), 'utf8')
   const { data, content } = matter(raw)
+  // The publish gate runs inside the production build too, so an edit made in the CMS
+  // cannot put a published article live if it fails lint. The build fails and the last good deploy stays up.
+  if (data.status === 'published' && process.env.NODE_ENV === 'production') {
+    const violations = lintPublished(raw)
+    if (violations.length) throw new Error(`Publish gate: ${file} is published but fails lint:\n  ${violations.slice(0, 8).join('\n  ')}`)
+  }
   const html = figures(render(content))
   const outline = [...html.matchAll(/<h2 id="([^"]+)">(.*?)<\/h2>/g)]
     .map((m) => ({ id: m[1], text: m[2].replace(/<[^>]+>/g, '') }))
@@ -67,6 +76,8 @@ function load(file: string): Article {
     specUrl: data.spec_url,
     date: toIsoDate(data.date),
     status: data.status === 'published' ? 'published' : 'draft',
+    cover: data.cover ?? '',
+    tag: data.tag ?? '',
     reviewedBy: data.reviewed_by ?? '',
     disclosure: data.disclosure ?? '',
     corrections: Array.isArray(data.corrections) ? data.corrections.map(String) : [],

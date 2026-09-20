@@ -6,7 +6,7 @@ export type ZipEntry = { zip: number; title: string; status: string; upgrade: st
 
 export function getZips(): ZipEntry[] {
   const file = path.resolve(process.cwd(), process.env.ZIPS_FILE || 'zips/zips.json')
-  const entries: ZipEntry[] = JSON.parse(fs.readFileSync(file, 'utf8'))
+  const entries: ZipEntry[] = JSON.parse(fs.readFileSync(file, 'utf8')).entries
   const visible = new Map(getArticles().map((a) => [a.zip, a.slug]))
   // An explainer link appears only once that article is visible in this build.
   return entries.map((e) => ({ ...e, articleSlug: visible.get(e.zip) }))
