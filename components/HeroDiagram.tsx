@@ -1,7 +1,7 @@
 // The hero diagram: what goes into one article. Pure SVG, animated with CSS.
 const nodes = [
   { x: 40, y: 34, w: 150, label: 'ZIP SPEC', sub: 'zips.z.cash' },
-  { x: 330, y: 58, w: 150, label: 'OWNER REVIEW', sub: 'before publishing' },
+  { x: 330, y: 58, w: 150, label: 'TWO FACT CHECKS', sub: 'against the sources' },
   { x: 350, y: 232, w: 160, label: 'CASE AGAINST', sub: 'in every article' },
   { x: 70, y: 268, w: 170, label: 'CORRECTIONS', sub: 'logged in public' },
 ]
@@ -12,7 +12,7 @@ export default function HeroDiagram() {
   const cy = centre.y + centre.h / 2
   return (
     <figure className="hero-diagram" data-section="hero-diagram">
-      <svg viewBox="0 0 540 340" role="img" aria-label="What goes into a ZIPs For Nerds article: the ZIP spec, owner review, the case against, and public corrections">
+      <svg viewBox="0 0 540 340" role="img" aria-label="What goes into a ZIPs For Nerds article: the ZIP spec, two fact checks against the sources, the case against, and public corrections">
         {nodes.map((n, i) => {
           const nx = n.x + n.w / 2
           const ny = n.y + 23
