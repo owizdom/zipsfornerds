@@ -53,7 +53,8 @@ test('AT3 article page carries its accountability block', () => {
   }
 })
 
-test('AT4 zero third-party requests', () => {
+test('AT4 zero third-party requests (analytics off, the default)', () => {
+  assert.ok(!read('index.html').includes('googletagmanager'), 'the fixture build must be free of analytics')
   const offenders = []
   const cssFiles = walk(path.join(root, '.next', 'static')).filter((f) => f.endsWith('.css'))
   for (const f of pages().concat(cssFiles)) {
@@ -152,4 +153,25 @@ test('AT15 the CMS is not an open door in production', async () => {
   } finally {
     srv.kill('SIGTERM')
   }
+})
+
+test('AT16 the privacy claim always matches reality', () => {
+  // Analytics off (the fixture build): claim "no trackers" and load none.
+  const off = read('index.html')
+  assert.match(off, /data-privacy="none"/, 'footer should be in the no-analytics state')
+  assert.ok(off.includes('no cookies · no trackers'), 'footer should claim no trackers')
+  assert.ok(!off.includes('googletagmanager'), 'no analytics script when analytics is off')
+
+  // Analytics on: the claim must change with it.
+  const dist = '.next-ga'
+  const r = spawnSync('npx', ['next', 'build'], {
+    cwd: root, encoding: 'utf8',
+    env: { ...process.env, NODE_ENV: 'production', ARTICLES_DIR: 'tests/fixtures/articles', ZIPS_FILE: 'tests/fixtures/zips.json', NEXT_DIST_DIR: dist, NEXT_PUBLIC_GA_ID: 'G-TESTONLY123' },
+  })
+  assert.equal(r.status, 0, `analytics build failed:\n${r.stdout}${r.stderr}`)
+  const on = fs.readFileSync(path.join(root, dist, 'server', 'app', 'index.html'), 'utf8')
+  assert.match(on, /data-privacy="analytics"/, 'footer should be in the analytics state')
+  assert.ok(!on.includes('no cookies · no trackers'), 'the site must not claim "no trackers" while running one')
+  assert.ok(on.includes('Google Analytics'), 'footer should name the analytics provider')
+  assert.ok(on.includes('G-TESTONLY123'), 'the measurement id should reach the page')
 })

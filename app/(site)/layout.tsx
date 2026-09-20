@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Source_Serif_4, IBM_Plex_Mono, Inter } from 'next/font/google'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import Nav from '@/components/Nav'
+import PrivacyLine from '@/components/PrivacyLine'
 import Progress from '@/components/Progress'
 import { site } from '@/lib/site'
+import { analyticsEnabled, gaId } from '@/lib/analytics'
 import '../globals.css'
 
 const serif = Source_Serif_4({ subsets: ['latin'], style: ['normal', 'italic'], variable: '--font-serif', display: 'swap' })
@@ -54,7 +57,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 <li><a href={site.x}>Send a correction →</a></li>
                 <li><a href="/rss.xml">RSS feed</a></li>
               </ul>
-              <p className="label terms">Articles CC BY 4.0 · no cookies · no trackers</p>
+              <PrivacyLine />
             </div>
           </div>
           <div className="wrap fine">
@@ -62,6 +65,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             <em>{site.tagline}</em>
           </div>
         </footer>
+        {analyticsEnabled ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
     </html>
   )
