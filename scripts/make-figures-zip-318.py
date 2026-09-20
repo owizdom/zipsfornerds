@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Generates the SVG figures for the ZIP 318 article into public/figures/zip-318/.
+"""Generates the SVG figures for the ZIP 318 article into public/figures/zip-318-orchard-to-ironwood-migration/.
 Shared style: paper surface, ink lines, gold accent. System font stacks only, because the
 SVGs are loaded through <img> and cannot see the page's webfonts.
 Data figure palette (#c98500, #2a78d6) passes the dataviz validator against the paper surface.
 Run: python3 scripts/make-figures-zip-318.py"""
 import os
-OUT = os.path.join(os.path.dirname(__file__), '..', 'public', 'figures', 'zip-318')
+OUT = os.path.join(os.path.dirname(__file__), '..', 'public', 'figures', 'zip-318-orchard-to-ironwood-migration')
 os.makedirs(OUT, exist_ok=True)
 PAPER, DARK, INK, MUTED, GOLD, GOLDD, BLUE = '#f6f1e7', '#ebe3d2', '#16150f', '#6a665a', '#f4b728', '#c98500', '#2a78d6'
 MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
@@ -72,7 +72,7 @@ b = (f'<text x="40" y="42" class="m">FIG. 4 / THE TWO PHASES OF A ZIP 318 MIGRAT
      f'<line x1="450" y1="200" x2="506" y2="200" stroke="{INK}" stroke-width="2" marker-end="url(#arr)"/>'
      f'<rect x="510" y="70" width="410" height="262" fill="{DARK}" stroke="{INK}" stroke-width="2"/><text x="530" y="102" class="m">PHASE 2 · AMOUNTS PUBLIC</text><text x="530" y="134" class="sb">Scheduled transfers</text>'
      f'<text x="530" y="170" class="sm">1. Sign every transfer once, up front</text><text x="530" y="198" class="sm">2. Shuffle, then space them with random</text><text x="552" y="220" class="sm">gaps averaging 66 blocks</text>'
-     f'<text x="530" y="248" class="sm">3. A background task attaches a shared</text><text x="552" y="270" class="sm">anchor and broadcasts, one at a time</text><text x="530" y="310" class="m">NEVER SYNC AND BROADCAST TOGETHER</text>')
+     f'<text x="530" y="248" class="sm">3. Background tasks refresh the shared anchor,</text><text x="552" y="270" class="sm">then, in a later window, broadcast one</text><text x="530" y="310" class="m">NEVER SYNC AND BROADCAST TOGETHER</text>')
 write('fig-4-two-phases.svg', svg(960, 358, b, 'The two phases of a ZIP 318 migration',
       'Phase 1 prepares exact-value notes privately inside Orchard. Phase 2 pre-signs the transfers and broadcasts them one at a time on a random schedule.'))
 
@@ -90,7 +90,7 @@ write('fig-5-quantization.svg', svg(960, 298, b, 'How 123.45 ZEC is broken into 
       '1 hundred becomes 100; 2 tens become 20; 3 ones become 2 and 1; 4 tenths become 0.2 and 0.2; 5 hundredths become 0.05.'))
 
 # FIG 6: canonical transaction
-b = (f'<text x="40" y="42" class="m">FIG. 6 / EVERY MIGRATION TRANSACTION HAS THIS SHAPE</text>'
+b = (f'<text x="40" y="42" class="m">FIG. 6 / THE CANONICAL MIGRATION TRANSACTION</text>'
      f'<rect x="40" y="66" width="880" height="236" fill="none" stroke="{INK}" stroke-width="2"/><text x="60" y="96" class="m">ONE TRANSACTION · FEE 15,000 ZATOSHIS · NO TRANSPARENT PARTS · LOCK_TIME 0</text>'
      f'<rect x="60" y="116" width="480" height="166" fill="{DARK}" stroke="{INK}" stroke-width="1.5"/><text x="80" y="144" class="m">ORCHARD BUNDLE · EXACTLY 2 ACTIONS</text>'
      f'<rect x="80" y="160" width="210" height="100" fill="{PAPER}" stroke="{INK}" stroke-width="1.5"/><text x="185" y="202" class="sb" text-anchor="middle">Spend</text><text x="185" y="230" class="sm" text-anchor="middle">one funding note</text>'

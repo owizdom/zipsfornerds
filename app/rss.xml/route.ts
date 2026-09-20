@@ -8,7 +8,7 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 export function GET() {
   const items = getArticles({ includeDrafts: false })
     .map((a) => {
-      const url = `${site.url}/articles/${a.slug}/`
+      const url = `${site.url}/research/${a.slug}`
       return `    <item>
       <title>${esc(a.title)}</title>
       <link>${url}</link>

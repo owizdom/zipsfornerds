@@ -8,6 +8,8 @@ zip_category: Wallet
 spec_url: https://zips.z.cash/zip-0318
 date: 2026-09-20
 status: draft
+cover: /covers/zip-318-orchard-to-ironwood-migration/cover.svg
+tag: NU6.3
 reviewed_by: "Not yet reviewed by the ZIP's owners."
 disclosure: "[YOUR CALL, MUST BE TRUE ON THE DAY YOU PUBLISH]"
 corrections: []
@@ -19,7 +21,7 @@ Public announcement: this is officially the first post in ZIPs For Nerds, a seri
 
 The rules of the house are simple. Every article describes the problem a ZIP is trying to solve, walks through how the ZIP works, makes the case for it, and then (this part matters) gives the best arguments against it. I send each draft to the ZIP's owners before publishing, and corrections are logged at the top of the page where you can see them.
 
-I am starting with ZIP 318 because it is the ZIP most Zcash holders have already lived through without reading. If you opened a Zcash wallet after 28 July 2026 and found a prompt asking you to migrate your funds, ZIP 318 is the document that decided what happened next. You clicked a button. Somebody spent weeks arguing about what that button should do. This article is about the argument.
+I am starting with ZIP 318 because it is the ZIP most Zcash holders have already lived through without reading. If you opened a Zcash wallet after 28 July 2026 and found a prompt asking you to migrate your funds, ZIP 318 is the document that was meant to decide what happened next (whether your wallet actually followed it is a question I get to below). You clicked a button. Somebody spent weeks arguing about what that button should do. This article is about the argument.
 
 ## The short version
 
@@ -37,7 +39,7 @@ Still here? Good. Let's get into it.
 
 Zcash keeps shielded money in pools. Sprout came first, then Sapling, then Orchard. Inside a pool the amounts, senders and receivers are hidden. The one thing the chain always shows is value crossing a pool's border: when ZEC enters or leaves a pool, the net amount is public. Hold on to that fact, because everything in ZIP 318 follows from it.
 
-On 29 May 2026 Taylor Hornby, who had been asked to run an AI-assisted security audit of the Orchard shielded protocol, reported a soundness vulnerability in the Orchard Action circuit. (A proof system is sound when it is impossible to prove a false statement. An unsound one will happily certify a lie.) ZIP 257, which documents the response, says the flaw "could have allowed balance violation and theft of funds." In a pool where amounts are hidden, a forged proof is the worst kind of bug, because the coins it creates are invisible.
+On 29 May 2026 Taylor Hornby, who had been asked to run an AI-assisted security audit of the Orchard shielded protocol, reported a soundness vulnerability in the implementation of the Orchard Action circuit. (A circuit is sound when nobody can get it to accept a false statement. This implementation left a gap, in one of its scalar multiplication gadgets, through which someone could. The protocol as specified was fine.) ZIP 257, which documents the response, says the flaw "could have allowed balance violation and theft of funds." In a pool where amounts are hidden, a forged proof is the worst kind of bug, because the coins it creates are invisible.
 
 The response came in two steps, and the order mattered:
 
@@ -46,25 +48,25 @@ The response came in two steps, and the order mattered:
 
 Why not ship the fix and the shutdown together? ZIP 257 gives two reasons: doing so risked revealing the vulnerability before it had been mitigated, and disabling first closed the window "more quickly, while the fix was still being prepared and reviewed."
 
-![Timeline from the Orchard bug report on 29 May 2026 to the NU6.3 upgrade on 28 July 2026](/figures/zip-318/fig-1-timeline.svg "Figure 1. Sixty days from bug report to a new shielded pool. Heights and dates from ZIP 257, ZIP 258 and the ZIP index.")
+![Timeline from the Orchard bug report on 29 May 2026 to the NU6.3 upgrade on 28 July 2026](/figures/zip-318-orchard-to-ironwood-migration/fig-1-timeline.svg "Figure 1. Sixty days from bug report to a new shielded pool. Heights from ZIP 257 and ZIP 258. The NU6.2 date is from the ZIP index and the NU6.3 date is from CoinDesk.")
 
 That closed the hole going forward. It left a question about the past: had anyone used the flaw before it was found? Inside a shielded pool nobody can count the coins, so nobody could answer.
 
 The turnstile is how Zcash answers questions like that. ZIP 209 has nodes track the total value that has entered and left each pool, and it makes any block that would push a pool's balance below zero invalid. In the ZIP's words: "If the total value that is unshielded exceeds the total value that was shielded for a given pool, a balance violation has occurred in the corresponding shielded transaction protocol." Orchard as a whole can never pay out more ZEC than was paid into it.
 
-Be careful about what that buys you. The turnstile cannot tell an honest note from a counterfeit one as it leaves. What it gives everyone is a hard ceiling: the most that can ever come out of Orchard is what went in, and the balance of the new pool is exactly what was publicly counted into it. Shielded Labs describes the goal as letting anyone "verify the upper limit of how much ZEC can be used in the Orchard pool." That is a weaker promise than "the new pool is clean," and it is the honest one.
+Be careful about what that buys you. The turnstile cannot tell an honest note from a counterfeit one as it leaves. What it gives everyone is a hard ceiling: the most that can ever come out of Orchard is what went in, and the balance of the new pool is exactly what was publicly counted into it. Shielded Labs describes the goal of sealing Orchard as letting anyone "verify the upper limit of how much ZEC can be used in the Orchard pool." That is a weaker promise than "the new pool is clean," and it is the honest one.
 
-![Two shielded pools with a public turnstile between them](/figures/zip-318/fig-2-turnstile.svg "Figure 2. Inside a pool everything is hidden. The amount crossing between pools is public, and that is the point.")
+![Two shielded pools with a public turnstile between them](/figures/zip-318-orchard-to-ironwood-migration/fig-2-turnstile.svg "Figure 2. Inside a pool everything is hidden. The amount crossing between pools is public, and that is the point.")
 
-NU6.3 built the new pool. It activated on Mainnet at block 3,428,143, on 28 July 2026. One detail worth knowing before we go further: Ironwood is a new pool, and it is the same protocol. ZIP 258 describes Ironwood as "another use of the Orchard protocol," with the corrected circuit and a change to how notes are built (that second part is ZIP 2005, and it gets its own article). ZIP 258 also lists the rules that sealed the old pool:
+NU6.3 built the new pool. It activated on Mainnet at block 3,428,143 (ZIP 258), on 28 July 2026 (CoinDesk's report of the activation). One detail worth knowing before we go further: Ironwood is a new pool that reuses an existing protocol. ZIP 258 describes it as "another use of the Orchard protocol." It runs an updated Action circuit, and its notes are built slightly differently (that second part is ZIP 2005, and it gets its own article). ZIP 258 also lists the rules that sealed the old pool:
 
 - Coinbase transactions can no longer contain Orchard actions.
 - No new value may enter the Orchard pool.
 - Transfers between different addresses inside Orchard are disabled.
 
-Value may still leave, "including across the turnstile into the Ironwood pool." ZIP 318 sums up the effect from a wallet's point of view: NU6.3 "disables ordinary payments within the old Orchard pool while still permitting change."
+Value may still leave, "including across the turnstile into the Ironwood pool." ZIP 318 sums up the effect from a wallet's point of view: NU6.3 "disables ordinary payments within the old Orchard pool while still permitting change" and so requires wallets to add a way to migrate.
 
-So Orchard became a room nobody can enter, where the only useful thing left to do is leave. Shielded Labs estimated that about 3.7 million ZEC was sitting in it on 15 July 2026. All of it had to walk out through a counted exit, in public, one transaction at a time.
+So Orchard became a room nobody can enter, where the only useful thing left to do is leave. Shielded Labs noted that about 3.7 million ZEC was sitting in it on 15 July 2026. All of it had to walk out through a counted exit, in public, one transaction at a time.
 
 > "The amounts are publicly revealed in order to give a complete accounting to the public of how much ZEC has entered and exited which pools." (Zooko Wilcox and Taylor Hornby, Shielded Labs)
 
@@ -83,7 +85,7 @@ It gets worse off-chain. Alice uses a phone wallet, which talks to a light walle
 
 There is also the adversary who plans ahead. Suppose Mallory sends Alice a payment of 0.31415926 ZEC (nobody said attackers lack a sense of humour), then watches the turnstile for that value or a sum containing it. ZIP 318 calls this tagging, and a migration design has to survive it.
 
-![A naive single-transfer migration compared with a ZIP 318 migration spread over time](/figures/zip-318/fig-3-naive-vs-zip318.svg "Figure 3. Same money, two crossings. The top one publishes a balance. The bottom one publishes seven amounts that many other transfers also use.")
+![A naive single-transfer migration compared with a ZIP 318 migration spread over time](/figures/zip-318-orchard-to-ironwood-migration/fig-3-naive-vs-zip318.svg "Figure 3. Same money, two crossings. The top one publishes a balance. The bottom one publishes seven amounts that many other transfers also use.")
 
 The ZIP describes the situation in one sentence that I think is the key to reading the rest of it. Because the crossing amount is always public, "the only privacy levers available to a wallet are the shape of the amounts it migrates and the timing of their broadcast." Two levers. That is all you get.
 
@@ -100,7 +102,7 @@ The procedure has two phases:
 1. **Note preparation.** The wallet decides which standard amounts it will migrate and rearranges the user's Orchard notes, privately, so that one note of exactly the right size exists for each planned transfer.
 2. **Scheduled migration transactions.** The wallet signs every migration transaction in advance, then broadcasts them one at a time, at randomly drawn block heights, from background tasks.
 
-![The two phases of a ZIP 318 migration: private note preparation, then scheduled public transfers](/figures/zip-318/fig-4-two-phases.svg "Figure 4. Phase 1 happens entirely inside Orchard and reveals no amounts. Phase 2 is where amounts become public, so that is where all the care goes.")
+![The two phases of a ZIP 318 migration: private note preparation, then scheduled public transfers](/figures/zip-318-orchard-to-ironwood-migration/fig-4-two-phases.svg "Figure 4. Phase 1 happens entirely inside Orchard and reveals no amounts. Phase 2 is where amounts become public, so that is where all the care goes.")
 
 The ZIP lists six privacy properties the default flow should preserve, to the extent the platform allows:
 
@@ -117,7 +119,7 @@ The list of things the ZIP declines to promise is as informative. A migration in
 
 ### Consent comes first
 
-When a wallet sees a spendable Orchard balance around NU6.3, it should surface a dedicated migration screen, and that screen MUST display the Orchard balance at risk. The wallet should offer two paths: migrate immediately, in a single transfer with minimal privacy, or migrate with privacy. Before any funds move, the wallet MUST show the full proposed schedule and get the user's confirmation. After that, individual transfers go out on schedule without asking again. The ZIP also tells wallets to keep the number of privacy settings small, because most users cannot be expected to tune them.
+When a wallet sees a spendable Orchard balance around NU6.3, it should surface a dedicated migration screen, and that screen MUST display the Orchard balance at risk. The wallet should offer two paths: migrate immediately, in a single transfer with minimal privacy, or migrate with privacy. Before any funds leave the Orchard pool, the wallet MUST show the full proposed schedule and get the user's confirmation. After that, individual transfers go out on schedule without asking again. The ZIP also tells wallets to keep the number of privacy settings small, because most users cannot be expected to tune them.
 
 A subtle point for the careful reader. ZIP 315, the wallet best-practices ZIP, says "there should be per-transaction opt-in for any transfer that publically reveals amounts on chain." ZIP 318 treats one confirmation of the whole schedule as that consent. I think that reading is reasonable (nobody wants twenty pop-ups). It is ZIP 318's interpretation, though, and worth knowing as such.
 
@@ -127,7 +129,7 @@ Every migration transaction moves one denomination, and the permitted denominati
 
 The wallet breaks the balance down digit by digit. A 9 becomes 5, 2, 2. An 8 becomes 5, 2, 1. A 4 becomes 2, 2. The ZIP's own worked example happens to be Alice's number: 123.45 ZEC becomes 100, 20, 2, 1, 0.2, 0.2 and 0.05. A holder with 25,000 ZEC gets 10,000, 10,000 and 5,000.
 
-![The balance 123.45 ZEC broken digit by digit into seven standard denominations](/figures/zip-318/fig-5-quantization.svg "Figure 5. Canonical quantization of 123.45 ZEC. Every output is a value that many other wallets will also emit.")
+![The balance 123.45 ZEC broken digit by digit into seven standard denominations](/figures/zip-318-orchard-to-ironwood-migration/fig-5-quantization.svg "Figure 5. Canonical quantization of 123.45 ZEC. Every output is a value that many other wallets will also emit.")
 
 Two details complete the picture. Whatever is left below 0.01 ZEC is the residual, and it stays behind in Orchard. And the fee rides on top of each part: the note that funds a 20 ZEC transfer is worth 20 ZEC plus the fee, so exactly 20 ZEC arrives in Ironwood. (That is why I said Alice has 123.45 ZEC after setting fees aside. A wallet holding exactly 123.45 ZEC would migrate slightly less, and the last digits of the breakdown would change.)
 
@@ -141,15 +143,15 @@ A migration transaction spends exactly one Orchard note, so the wallet first nee
 
 Note preparation fixes this with one or more send-to-self transactions inside Orchard. They are fully shielded, so the amounts and the rearranging are invisible.
 
-Each preparation transaction should contain exactly 16 Orchard actions, padded if needed. If you know classic Orchard, you may expect a 16-action bundle to carry up to 16 spends and 16 outputs. Under NU6.3 it does not. The ZIP explains that every spend and every output is now paired with a fabricated counterpart, so "a bundle's action count is the sum of its spends and outputs." A 16-action transaction can therefore consume and produce at most 16 notes in total: 15 spends and one output when consolidating, for example, or one spend and 15 outputs when splitting.
+Each preparation transaction should contain exactly 16 Orchard actions, padded if needed. If you know classic Orchard, you may expect a 16-action bundle to carry up to 16 spends and 16 outputs. Under NU6.3 it does not. The ZIP explains that each spend and each output "is paired with a fabricated counterpart under NU6.3," which makes a bundle's action count the sum of its spends and outputs. A 16-action transaction can therefore consume and produce at most 16 notes in total: 15 spends and one output when consolidating, for example, or one spend and 15 outputs when splitting.
 
-A wallet with many small notes, or one very large note, needs several layers of preparation. The ZIP points out that the number of layers grows with the logarithm of the note count (base roughly 15), and that on-chain a holder splitting one huge note looks the same as a user sweeping up dust.
+A wallet with many small notes, or one note that has to split into more than 15 funding notes, needs several layers of preparation. The ZIP points out that the number of layers grows with the logarithm of the note count (base roughly 15), and that on-chain a holder splitting one huge note looks the same as a user sweeping up dust.
 
-Even these hidden transactions are spaced out. The gap between one preparation transaction and the next is drawn from an exponential distribution with a mean of 16 blocks (about twenty minutes), and any draw above 96 blocks is thrown away and redrawn. The reason: a burst of identical sixteen-action transactions would form a recognisable cluster and announce that a migration is about to begin.
+Even these hidden transactions should be spaced out. The gap between one preparation transaction and the next is drawn from an exponential distribution with a mean of 16 blocks (about twenty minutes), and any draw above 96 blocks is thrown away and redrawn. The reason: a burst of identical sixteen-action transactions would form a recognisable cluster and announce that a migration is about to begin.
 
 ### The canonical migration transaction
 
-Every migration transaction is built to one template:
+A conforming migration transaction should follow one template (the ZIP's word is SHOULD, for every item):
 
 - exactly one Orchard spend, with the Orchard bundle padded to exactly two actions;
 - exactly one Ironwood output, carrying one standard denomination, in a single-action bundle with no padding;
@@ -157,7 +159,7 @@ Every migration transaction is built to one template:
 - the canonical fee, provisionally the ZIP 317 minimum. With two Orchard actions and one Ironwood action that is three logical actions at 5,000 zatoshis each, so 15,000 zatoshis;
 - lock_time of zero, and nothing else that could set the transaction apart.
 
-![The canonical migration transaction: a two-action Orchard bundle and a single-action Ironwood bundle](/figures/zip-318/fig-6-canonical-transaction.svg "Figure 6. One spend, one possibly-empty output, one Ironwood output. If your wallet builds anything else, it is standing outside the crowd.")
+![The canonical migration transaction: a two-action Orchard bundle and a single-action Ironwood bundle](/figures/zip-318-orchard-to-ironwood-migration/fig-6-canonical-transaction.svg "Figure 6. One spend, one possibly-empty output, one Ironwood output. If your wallet builds anything else, it is standing outside the crowd.")
 
 The two-action Orchard bundle is one spend action and one output action, and an observer cannot tell whether that output carries change or a zero-valued dummy. The single action on the Ironwood side is unpadded on purpose. There is nothing left to hide on that side, a padding action would cost an extra proof, and the ZIP singles out hardware wallets, where proving data has to cross a slow link. What matters, the ZIP says, is that "one action count is pinned as canonical," because optional padding would split wallets into two visibly different groups.
 
@@ -171,9 +173,9 @@ ZIP 318 replaces personal anchors with shared ones. Boundaries are the blocks wh
 
 The wallet picks among the eligible boundaries at random, weighted toward recent ones. The anchor's age, counted in boundaries back from the newest one the wallet has seen, is drawn from a geometric distribution with parameter one half, starting at one. So the newest boundary is never used, and the likeliest choice is the one before it. Draws above the cap of four are thrown away and redrawn.
 
-![Odds of choosing each anchor boundary: about 53, 27, 13 and 7 percent for ages one to four](/figures/zip-318/fig-7-anchor-buckets.svg "Figure 7. Anchor selection. The odds shown are my own arithmetic from the ZIP's rule: a geometric draw with parameter one half, redrawn above the cap of four.")
+![Odds of choosing each anchor boundary: about 53, 27, 13 and 7 percent for ages one to four](/figures/zip-318-orchard-to-ironwood-migration/fig-7-anchor-buckets.svg "Figure 7. Anchor selection. The odds shown are my own arithmetic from the ZIP's rule: a geometric draw with parameter one half, redrawn above the cap of four.")
 
-A note for the ZIP's owners, offered with respect. The text says "the mean age is two boundaries (about six hours)." That is the mean of the untruncated distribution. With the cap of four applied, I get 26/15, or about 1.7 boundaries (roughly five hours). The text also lists the newest observed boundary in the candidate set and then excludes it in the draw. Neither changes how a wallet behaves. They read like leftovers from the timing change I describe in the drawbacks section.
+A note for the ZIP's owners, offered with respect. The text says "the mean age is two boundaries (about six hours)." That is the mean of the untruncated distribution, and it was accurate to four decimal places while the cap was 16. With the cap of four applied, I get 26/15, or about 1.7 boundaries (roughly five hours), so the sentence looks like a leftover from the timing change I describe in the drawbacks section. Separately, the text has listed the newest observed boundary in the candidate set, and then excluded it in the draw, since the first merged version. Neither point changes how a wallet behaves.
 
 All transactions sharing a boundary form a cohort, and a wallet is allowed to place several of its parts in one cohort. Standard amounts make that safe. Three 100 ZEC transfers in one cohort could belong to one wallet or to three, and nothing on-chain says which.
 
@@ -183,7 +185,7 @@ The wallet shuffles its parts into a random order, so that the sequence of amoun
 
 The exponential distribution is chosen for a specific property. It is memoryless, so seeing one of Alice's broadcasts tells an observer nothing about when her next will come. The rationale adds that independent Poisson processes merge into a single Poisson process, which means the combined traffic of every conforming wallet cannot be separated back into individual wallets by timing.
 
-How long does Alice wait? Seven parts at an average of 82 minutes each is about ten hours. There is also a mandatory pause before the first transfer: the schedule MUST start no earlier than one full three-hour bucket past the first boundary after her funding notes were created, which adds somewhere between three and six hours. Add preparation and a realistic expectation is most of a day. The ZIP says as much about large holders: duration grows at roughly one mean delay per part.
+How long does Alice wait? Seven parts at an average of 82 minutes each is about ten hours. There is also a mandatory pause before the first transfer: the schedule MUST start no earlier than one full three-hour bucket past the first boundary at or after the creation of her funding notes, which adds somewhere between three and six hours. Add preparation and a realistic expectation is most of a day. The ZIP says as much about large holders: duration grows at roughly one mean delay per part.
 
 One piece of machinery makes this workable. Under the version 6 transaction format that arrived with NU6.3, the anchor is committed as authorizing data and sits outside the signature hash. The wallet can therefore sign the entire schedule in one session, and attach or refresh each transaction's anchor and proof later, near broadcast time, without asking for another signature. Under the version 5 rules the anchor was fixed at signing, and the gap between anchor age and broadcast height would have revealed when the schedule was prepared.
 
@@ -191,7 +193,7 @@ One piece of machinery makes this workable. Under the version 6 transaction form
 
 Syncing reveals things to the light wallet server. Broadcasting reveals a transaction. If both happen in the same session, the server can pair them. So ZIP 318 says a single background window MUST be used either to sync and update proofs or to broadcast, never both.
 
-![Background windows alternate between syncing and broadcasting and never do both](/figures/zip-318/fig-8-sync-vs-broadcast.svg "Figure 8. One job per window. It is the cheapest rule in the ZIP and one of the most important.")
+![Background windows alternate between syncing and broadcasting and never do both](/figures/zip-318-orchard-to-ironwood-migration/fig-8-sync-vs-broadcast.svg "Figure 8. One job per window. It is the cheapest rule in the ZIP and one of the most important.")
 
 Phones complicate this. iOS and Android decide when background tasks run, and some Android vendors suppress them even with permissions granted. The ZIP treats scheduling as best-effort throughout. A slip of up to about two hours counts as normal. If a window is missed, the wallet catches up when the user next opens it, under two conditions: it should disclose that sending at app-open time weakens privacy for that transfer, and it MUST NOT send more than one overdue transfer per open, because several public amounts in one session leak balance. Product copy is not supposed to call the migration automatic or guaranteed, and the catch-up prompt must not look like an error.
 
@@ -201,11 +203,11 @@ Before the schedule is committed, the wallet MUST present a network privacy step
 
 ### When things go wrong
 
-The error-handling section covers the cases you would expect. A failed broadcast keeps its pre-signed transaction and retries. If the user spends Orchard funds outside the migration and invalidates a queued transfer, the wallet detects it and rebuilds the schedule for what remains. An expired transaction is rebuilt with a fresh anchor and expiry and the same denomination. If the canonical fee changes between preparation and broadcast, the affected parts are rebuilt.
+The error-handling section covers the cases you would expect. A failed broadcast keeps its pre-signed transaction and retries. If the user spends Orchard funds outside the migration and invalidates a queued transfer, the wallet MUST detect it, MUST tell the user, and MUST rebuild the schedule for what remains. An expired transaction is rebuilt with a fresh anchor and expiry and the same denomination. If the canonical fee changes between preparation and broadcast, the affected parts should be rebuilt, or the remaining balance prepared again.
 
-This is where the pure-function breakdown pays off. After a reinstall, or a restore on a new device, the local schedule is gone. The wallet can still use its viewing keys to see which standard amounts have already landed in Ironwood, recompute the breakdown of whatever remains, and start a fresh migration for it. The authors considered going further and making the whole design stateless, and decided against it because persisted, pre-signed transactions make the timing protections much easier to get right.
+This is where the pure-function breakdown earns a mention. After a reinstall, or a restore on a new device, the local schedule is gone. Because every migration transaction has the canonical shape, the wallet can use its viewing keys to see which standard amounts have already landed in Ironwood, and it may then start a fresh migration for whatever remains. (Notes that already have standard values should be left out of the recomputed balance and spent directly.) The authors considered going further with a fully stateless design, which the deterministic breakdown would have made robust, and decided against it because persisted, pre-signed transactions make the timing protections much easier to get right.
 
-> "The security analysis of migration strategies is subtle, and the more obvious strategies leak significant information." (ZIP 318, Motivation)
+> "The security analysis of migration strategies is subtle, and the more obvious strategies leak significant information ..." (ZIP 318, Motivation)
 
 ## Why ZIP 318? The case for the design
 
@@ -219,7 +221,7 @@ The rejected alternatives show how the authors got there:
 - A random partition of the balance was ruled out because the pieces sum to the balance and invite subset-sum reconstruction.
 - An earlier design used whole-ZEC parts plus a leftover below 1 ZEC, and the leftover turned out to be the problem: a rare value that made it dangerous to put two parts in the same cohort.
 
-Canonical quantization replaced all three because it has no odd remainder at all. Every emitted value is one that other wallets emit too.
+The ZIP records that last design as "Superseded by canonical-only quantization, which has no remainder output." Every emitted value is one that other wallets emit too.
 
 ### It survives tagging
 
@@ -227,11 +229,11 @@ Go back to Mallory and the 0.31415926 ZEC. Three mechanisms defeat the plan. Mig
 
 ### One signing session
 
-Exact-value funding notes look like a privacy feature and are really an operational one, which the ZIP states openly. They let every part be funded independently, so the whole schedule can be signed once and broadcast in any order. Shielded Labs spells out what the alternative means for hardware wallet users under a gradual strategy: they would have to "manually approve each of the roughly 25 or more migration transactions on their hardware device." One session is kinder.
+Exact-value funding notes look like a privacy feature and are really an operational one, which the ZIP states openly. They let every part be funded independently, so the whole schedule can be signed once and broadcast in any order. Shielded Labs spells out what the alternative looks like for hardware wallet users under its own sign-each-transaction strategy, for a balance in the low thousands of ZEC: they would have to "manually approve each of the roughly 25 or more migration transactions on their hardware device." One session is kinder.
 
 ### The crowd includes people who never heard of ZIP 318
 
-A canonical migration transaction is built to look like an Orchard to Ironwood spend made by hand, with one condition the ZIP is careful to state: the match holds for manual spends "to the extent that they are built to this same single-action shape, which wallet builders are encouraged to use." Since NU6.3 disabled ordinary payments inside Orchard, those crossings make up essentially all remaining Orchard activity. The crowd a migration transaction hides in is therefore every conforming cross-pool spend on the network, which is larger than the set of wallets running this flow.
+A canonical migration transaction is built to look like an Orchard to Ironwood spend made by hand, with one condition the ZIP is careful to state: the match holds for manual spends "to the extent that they are built to this same single-action shape, which wallet builders are encouraged to use for this transfer form." Since NU6.3 disabled ordinary payments inside Orchard, those crossings make up essentially all remaining Orchard activity. The crowd a migration transaction hides in is therefore every conforming cross-pool spend on the network, which is larger than the set of wallets running this flow.
 
 ### The worst case is no worse
 
@@ -247,13 +249,13 @@ The first merged version of ZIP 318 used a mean gap of 144 blocks between transf
 
 One part of that proposal did not survive review. It would have allowed wallets to anchor at the most recent boundary, to mix scheduled transfers with manual ones. Kris Nuttycombe, one of the ZIP's owners, objected that this "would allow strong IP correlations by light wallet servers between scan time and transmission time, when the transmission time is close to a boundary," and that on iOS it would cause a lot of missed schedules. The published text keeps the minimum age at one.
 
-I read that exchange as the design's central tension made visible. Every hour of delay buys privacy and costs patience. In my view, a user who loses patience and presses "migrate immediately" gets the worst outcome the ZIP allows, and thins the crowd for everyone else while doing it.
+I read that exchange as the design's central tension made visible, within days of launch. Every hour of delay buys privacy and costs patience. In my view, a user who loses patience and presses "migrate immediately" gets the worst outcome the ZIP allows, and thins the crowd for everyone else while doing it.
 
 ### The network layer may matter more than everything above
 
 Zooko Wilcox and Taylor Hornby of Shielded Labs published a threat model for the migration while ZIP 318 was in review. Its first recommendation is blunt. They recommend "one primary defense: strengthen network-level privacy (i.e. using an appropriately configured Nym or Tor relay) before migration, to protect users from having their balances linked with their identity." Mixing concurrent migrations by amount and timing, which is most of what ZIP 318 specifies, is their secondary defense.
 
-Their document includes its own, slightly different, algorithm for amounts and timing in an appendix. Zooko's comment on the ZIP 318 pull request says of that appendix that it is "much less important for practical protection of real users than the other parts." He was talking about their algorithm. I will let you decide how far the remark travels.
+Their document includes its own, slightly different, algorithm for amounts and timing in an appendix. Zooko's comment on the ZIP 318 pull request says of that appendix that it is "much less important for practical protection of real users than the other parts" (the emphasis on "much less important" is his). He was talking about their algorithm. I will let you decide how far the remark travels.
 
 Their reasoning is that the attack most likely to hurt someone is a server or network observer linking an IP address to an approximate balance, and that no choice of amounts prevents it. They also set a higher bar than routing broadcasts through Tor. To make identifying information unlinkable, they argue, a wallet would also need to download compact blocks over Tor or Nym, query transparent addresses at randomised times, and create fresh Tor circuits for unlinkable operations, each with a cost to user experience.
 
@@ -261,15 +263,15 @@ ZIP 318 requires wallets to offer network privacy and to warn users. It stops sh
 
 ### Does every wallet really have to look the same?
 
-ZIP 318 says yes. The canonical shape exists to unify the anonymity set, and optional padding would partition it.
+ZIP 318 leans yes. The canonical shape is a SHOULD, and the ZIP allows a different amount-selection strategy "provided it achieves the same effect." Its rationale is firm, though: the shape exists to unify the anonymity set, and optional differences partition it.
 
-Shielded Labs says probably not. In the same pull request comment, Zooko writes that "we currently think that it is *not* necessary for all or many wallet implementations and users to use compatible (indistinguishable on the blockchain) migration transactions." Their threat model makes the argument for hardware wallets: a different strategy lets an attacker split the traffic into groups, "but partitioning the traffic does not necessarily enable him to overcome the defenses and violate the security invariants." Their view is that a small cohort of users who start together, behind strong network privacy, may protect each other well enough.
+Shielded Labs says probably not. In the same pull request comment, Zooko writes that "we currently think that it is not necessary for all or many wallet implementations and users to use compatible (indistinguishable on the blockchain) migration transactions" (he stressed the "not"), and gives that as another reason their appendix matters less than the rest. Their threat model makes the argument for hardware wallets: a different strategy lets an attacker split the traffic into groups, "but partitioning the traffic does not necessarily enable him to overcome the defenses and violate the security invariants." Their view is that a small cohort of users who start together, behind strong network privacy, may protect each other well enough.
 
-This matters because wallets have in fact diverged. CipherScan's tracker, when I checked it on 20 September 2026, listed four entries as ZIP 318 compliant: Vizor, ZODL on iOS and on Android, and zcash_pool_migration, the Rust library in librustzcash that ZODL uses. It described Zkool's desktop wallet as "Private migration, not ZIP-318: separate splitting and migration phases, privacy-first note selection, and a speed slider." (A privacy and speed slider is one of the alternatives ZIP 318 explicitly rejected.) Brave and Edge were listed as unknown. Separately, an issue filed against Brave's codebase on 14 September 2026 reports that its migration code pads the Ironwood bundle to two actions where the ZIP specifies one, which would cost a one-spend transaction 20,000 zatoshis where the canonical transaction pays 15,000.
+This matters because wallets have in fact diverged. CipherScan's tracker, when I checked it on 20 September 2026, listed four entries as ZIP 318 compliant: Vizor, ZODL on iOS and on Android, and zcash_pool_migration, the Rust library in librustzcash that ZODL uses. (CipherScan labels that library the reference implementation of ZIP 318. Its own README calls it "A backend-agnostic engine for migrating Zcash wallet funds between value pools.") It described Zkool's desktop wallet as "Private migration, not ZIP-318: separate splitting and migration phases, privacy-first note selection, and a speed slider." (A privacy and speed slider is one of the alternatives ZIP 318 explicitly rejected.) Brave and Edge were listed as unknown. Separately, an issue filed against Brave's codebase on 14 September 2026 reports that its migration code pads the Ironwood bundle to two actions where the ZIP specifies one, which would cost a one-spend transaction 20,000 zatoshis where the canonical transaction pays 15,000.
 
 If ZIP 318 is right, each of these differences shrinks somebody's crowd. If Shielded Labs is right, it matters much less than whether those users turned on Tor. I have not seen the question settled.
 
-Two smaller points belong here. The ZIP is still a Draft, and its own reference implementation section is still a TODO, even though a reference implementation exists (it is the zcash_pool_migration crate above). The ZIP should link it. And the design is stateful: the schedule and the pre-signed transactions live on one device.
+Two smaller points belong here. The ZIP is still a Draft, and its own reference implementation section is still a TODO, even though working code exists (the zcash_pool_migration crate above). The ZIP should link it. And the design is stateful: the schedule and the pre-signed transactions live on one device.
 
 ### Large holders get the weakest protection
 
@@ -281,15 +283,15 @@ Shielded Labs goes further and questions whether hiding the distribution of weal
 
 This one is my own question, and I have not seen it discussed.
 
-ZIP 318 expresses almost all of its timing in blocks, and gives the wall-clock equivalents "at 75-second block spacing." In a coinholder poll that closed on 14 September 2026, 99.9% of participating ZEC backed cutting the block target to 25 seconds in NU7, under ZIP 218. (The ZIP index still says no decision has been made on which ZIPs NU7 will include, so treat this as likely and not final.)
+ZIP 318 expresses almost all of its timing in blocks, and gives the wall-clock equivalents for 75-second block spacing. In the NU7 coinholder poll, which closed on 14 September 2026, 99.9% of participating ZEC backed cutting the block target to 25 seconds. ZIP 218 is the proposal that specifies that change. (The ZIP index still says no decision has been made on which ZIPs NU7 will include, so treat this as likely and not final.)
 
 If that activates while migrations are still running, here is what the arithmetic says:
 
 - The mean gap between transfers, 66 blocks, shrinks from about 82 minutes to about 27.
 - The anchor bucket, 144 blocks, shrinks from three hours to one.
-- The expiry window, 34,560 blocks, shrinks from thirty days to ten, so the ZIP's promise of "between one and two months of validity" no longer holds.
+- The expiry window, 34,560 blocks, shrinks from thirty days to ten, so the ZIP's promise of "between one and two months of validity" would no longer hold. (An owner could fairly answer that the ZIP defines EXPIRY_MODULUS as "the number of blocks corresponding to 30 days," so the number rescales by definition. The code in librustzcash carries it as a fixed constant, which is why I think the question is worth asking out loud.)
 
-ZIP 218 rescales node constants that represent durations. I searched its text and found no mention of ZIP 318 or of wallet migration constants. The ZIP's own rationale warns against delays that are short relative to the bucket interval, and both would shrink together, so that ratio survives. The absolute spread of a wallet's transfers over time would not. One person is well placed to sort this out: Dev Ojha owns ZIP 218 and also wrote the pull request that retuned ZIP 318's timing.
+ZIP 218 rescales node constants that represent durations. I searched its text and found no mention of ZIP 318 or of wallet migration constants. The ZIP's own rationale warns against delays that are short relative to the bucket interval, and both would shrink together, so that ratio survives. The absolute spread of a wallet's transfers over time would not. One person is well placed to sort this out: Dev Ojha co-owns ZIP 218 (with Evan Forbes) and also wrote the pull request that retuned ZIP 318's timing.
 
 > "If you get on a bus all by yourself, you'll be revealing your balance ..." (Zooko Wilcox and Taylor Hornby, Shielded Labs)
 
@@ -297,17 +299,17 @@ ZIP 218 rescales node constants that represent durations. I searched its text an
 
 When I checked CipherScan's Ironwood tracker on 20 September 2026 [REFRESH ON PUBLICATION DAY], it showed 3,223,058 ZEC migrated from Orchard into Ironwood, which it reports as 88.7% of the Orchard supply, carried by 22,882 transactions. 410,124 ZEC was still in Orchard.
 
-![Bar showing 88.7 percent of the Orchard supply migrated to Ironwood and 11.3 percent remaining](/figures/zip-318/fig-9-migration-progress.svg "Figure 9. Orchard's exit, as of 20 September 2026. Source: CipherScan. Ironwood's total balance is higher, about 3.97 million ZEC, because it has also received ZEC from the transparent pool, from Sapling and from coinbase rewards.")
+![Bar showing 88.7 percent of the Orchard supply migrated to Ironwood and 11.3 percent remaining](/figures/zip-318-orchard-to-ironwood-migration/fig-9-migration-progress.svg "Figure 9. Orchard's exit, as of 20 September 2026. Source: CipherScan. Ironwood's own balance, about 3.97 million ZEC, is a different number: roughly 4.55 million ZEC has entered it from all sources (Orchard, the transparent pool, Sapling and coinbase rewards) and roughly 0.58 million has since left.")
 
-The rush is over. The tracker counted 199 migrations in the previous 24 hours.
+The rush is over. Those 22,882 transactions work out to about 420 a day across the 54 days since activation. The tracker counted 199 in the previous 24 hours.
 
-That tail matters for anyone who has not migrated yet. The design depends on a crowd, and the crowd is thinning. The ZIP's own analysis notes that in the first days after activation privacy rested "on cohort size" because every migrating wallet shared the same few anchors. Latecomers still draw from the same small window of recent anchors. What they lack is company inside each cohort. For a late migrator, and this is my reading, the Shielded Labs advice about network-level privacy carries more weight than it did in July.
+That tail matters for anyone who has not migrated yet. The design depends on a crowd, and the crowd is thinning. The ZIP's own analysis notes that in the first days after activation privacy rested "on cohort size" because every migrating wallet shared the same few anchors. Latecomers still draw from the same small window of recent anchors. My reading is that what they lack is company inside each cohort, and that for a late migrator the Shielded Labs advice about network-level privacy carries more weight than it did in July.
 
 ## Conclusion
 
 ZIP 318 is a careful answer to a narrow question: if an amount must be public, how do you keep it from pointing at you? Its answer is to stop trying to be unpredictable and start trying to be common. Standard amounts, a standard transaction shape, shared anchors and shared expiry heights all push in one direction, which is making one wallet's transfers look like everyone's.
 
-Its limits are the ones its authors and reviewers named. It is slow enough that users pushed back within a day. It protects large holders least. It asks wallets to build structurally identical transactions while the ZIP is still a Draft, and some have not. And the researcher who found the original bug, together with his co-author, thinks the network layer deserves more attention than the arithmetic.
+Its limits are the ones its authors and reviewers named. It is slow enough that its timing was retuned within days of launch, citing user impatience. It protects large holders least. It asks wallets to build structurally identical transactions while the ZIP is still a Draft, and some have not. And the researcher who found the original bug, together with his co-author, thinks the network layer deserves more attention than the arithmetic.
 
 If you still hold ZEC in Orchard, the practical reading is short. Use a wallet that CipherScan lists as ZIP 318 compliant, choose the private migration, turn on Tor or Nym when the wallet offers it, and let the schedule run. Then go outside. It will take a while.
 
@@ -334,4 +336,5 @@ Next in the series: ZIP 2005, Ironwood Quantum Recoverability, and what it means
 - brave/brave-browser issue 58958, migration fee overpayment from extra bundle padding. https://github.com/brave/brave-browser/issues/58958
 - CipherScan, Ironwood upgrade and migration tracker (pool balances, sources of Ironwood ZEC, wallet compliance table). https://cipherscan.app/ironwood
 - CoinDesk, "Zcash Ironwood goes live, here's everything to keep track of," 28 July 2026. https://www.coindesk.com/tech/2026/07/28/zcash-seals-usd1-7-billion-shielded-pool-as-ironwood-upgrade-activates
+- Zcash Labs, NU7 coinholder vote page (snapshot and closing dates). https://zcashlabs.org/voting
 - CoinDesk, "Zcash holders overwhelmingly back faster transactions and bitcoin-style halvings," 16 September 2026. https://www.coindesk.com/tech/2026/09/16/zcash-holders-overwhelmingly-back-faster-transactions-and-bitcoin-style-halvings

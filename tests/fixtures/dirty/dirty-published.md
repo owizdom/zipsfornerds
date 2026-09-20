@@ -1,5 +1,5 @@
 ---
-title: "ZIP 9999: A Fixture Proposal"
+title: "ZIP 7777: Dirty"
 series_number: 98
 subtitle: "A published fixture used only by the test suite."
 zip: 9999
@@ -18,7 +18,7 @@ corrections:
 
 ## The short version
 
-This is a published fixture. It exists so the tests have something real to assert on.
+This published fixture has an em dash — right here. It exists so the tests have something real to assert on.
 
 ## How it works
 
