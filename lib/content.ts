@@ -9,6 +9,7 @@ import rehypeSlug from 'rehype-slug'
 import rehypeStringify from 'rehype-stringify'
 import { lintPublished } from './lint'
 import { rehypeFigures, rehypeSafeUrls } from './markdown'
+import { normaliseMarkdocTags } from './markdoc-tags'
 
 export type Article = {
   slug: string
@@ -47,7 +48,7 @@ function render(markdown: string): string {
       .use(rehypeSafeUrls)
       .use(rehypeSlug)
       .use(rehypeStringify)
-      .processSync(markdown),
+      .processSync(normaliseMarkdocTags(markdown)),
   )
 }
 

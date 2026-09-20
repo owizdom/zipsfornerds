@@ -23,6 +23,8 @@ This is a published fixture. It exists so the tests have something real to asser
 
 ![A fixture figure](/figures/zip-318-orchard-to-ironwood-migration/fig-2-turnstile.svg "Fixture caption text.")
 
+{% figure src="/figures/uploads/tag-fixture.svg" alt="A figure written as a Markdoc tag" caption="Written as a Markdoc tag." /%}
+
 A second section, so the outline has two entries.
 
 ## Sources

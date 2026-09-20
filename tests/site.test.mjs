@@ -245,3 +245,16 @@ test('AT19 the site makes no owner-review promise', () => {
     for (const b of banned) assert.ok(!b.test(text), `${path.relative(root, f)} still promises owner review (${b})`)
   }
 })
+
+test('AT20 the CMS offers a captioned figure block that the renderer understands', () => {
+  const cfg = fs.readFileSync(path.join(root, 'keystatic.config.ts'), 'utf8')
+  assert.match(cfg, /content-components/, 'figure block should come from @keystatic/core/content-components')
+  assert.match(cfg, /components:\s*\{\s*figure\s*\}/, 'the markdoc field should register the figure block')
+  for (const k of ['src', 'alt', 'caption']) {
+    assert.match(cfg, new RegExp(`\\b${k}:`), `figure block is missing the "${k}" field`)
+  }
+  // A published fixture written with the Markdoc tag must render as a real figure.
+  const html = read('research/published-fixture.html')
+  assert.match(html, /<figure><img[^>]+tag-fixture\.svg[^>]*><figcaption>Written as a Markdoc tag\.<\/figcaption><\/figure>/,
+    'a {% figure %} tag should render as a captioned figure')
+})

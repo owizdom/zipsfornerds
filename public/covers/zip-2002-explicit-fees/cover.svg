@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="A subtraction sum crossed out beside a clearly written fee field">
+<rect width="800" height="600" fill="#16150f"/>
+<text x="400" y="200" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="44" fill="#f6f1e7" opacity=".35">in − out = ?</text>
+<line x1="210" y1="186" x2="590" y2="186" stroke="#c0392b" stroke-width="6"/>
+<rect x="210" y="300" width="380" height="110" fill="#f4b728"/>
+<text x="400" y="352" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="17" letter-spacing="3" fill="#16150f">FEE</text>
+<text x="400" y="390" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="30" fill="#16150f">0.0001 ZEC</text>
+<text x="400" y="546" text-anchor="middle" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="16" letter-spacing="5" fill="#f6f1e7" opacity=".8">WRITE IT DOWN</text></svg>
