@@ -222,6 +222,17 @@ a.cell .cell-zip { color: var(--ink); }
   .principles li { grid-template-columns: 52px 1fr; }
   .cols { grid-template-columns: 1fr; gap: 28px; }
 }
+@media (max-width: 480px) {
+  .site-header { flex-wrap: wrap; row-gap: 6px; }
+  .wordmark { font-size: 17px; }
+  .site-header nav { gap: 2px; }
+  .site-header nav a { padding: 6px 7px; letter-spacing: 0.08em; font-size: 10px; }
+  .wrap { padding: 0 18px; }
+  .grid-cells { grid-template-columns: 1fr 1fr; }
+  .cell { padding: 16px 12px; min-height: 112px; }
+  .work article { padding: 24px 20px; }
+  .section-head { flex-wrap: wrap; }
+}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .fade-in, .hero-diagram .wire, .hero-diagram .node { animation: none; opacity: 1; }
