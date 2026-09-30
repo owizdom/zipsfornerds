@@ -1,5 +1,7 @@
 # ZIPs For Nerds
 
+> **Discontinued.** This project is no longer maintained. The site and the published articles stay online as they are, and no new articles or updates are planned. The code and content remain available under their licenses for anyone who wants to fork it.
+
 One Zcash Improvement Proposal per article, explained properly. Site: https://zipsfornerds.com
 
 ## Work on it
